@@ -37,3 +37,8 @@ Thumbs.db
 *.log
 outputs/
 .cache/
+
+# Generated test fixtures
+tests/fixtures/sample_docs/*.pdf
+tests/fixtures/sample_docs/*.jpg
+tests/fixtures/sample_docs/*.png
