@@ -133,10 +133,18 @@ class DischargeSummary(BaseModel):
 
 
 class ParsedDocument(BaseModel):
+    model_config = {"arbitrary_types_allowed": True}
+
     file_id: str
     doc_type: DocType
     extracted: Optional[BaseModel] = None
     confidence: float = 0.0
+
+    def model_dump(self, **kwargs):
+        data = super().model_dump(**{k: v for k, v in kwargs.items() if k != "mode"})
+        if self.extracted is not None:
+            data["extracted"] = self.extracted.model_dump(mode=kwargs.get("mode", "python"))
+        return data
 
 
 SCHEMA_FOR_DOC_TYPE = {
