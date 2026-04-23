@@ -64,9 +64,25 @@ def parse_document(file_bytes, file_ext, file_id, expected_type=None):
 
 
 def parse_from_dict(file_id, doc_type, content, expected_type=None):
-    """Build a ParsedDocument from pre-extracted content (for test_cases.json)."""
+    """Build a ParsedDocument from pre-extracted content (for test_cases.json).
+
+    Tolerant of simplified shapes: e.g. medicines as ["name 500mg", ...] become
+    [{"name": "..."}], tests as plain strings become {"name": "..."}.
+    """
     if expected_type and doc_type != expected_type:
         raise WrongDocumentTypeError(file_id, expected_type.value, doc_type.value)
     schema = SCHEMA_FOR_DOC_TYPE[doc_type]
-    body = schema(**{k: v for k, v in content.items() if k in schema.model_fields})
+
+    def _coerce(key, val):
+        if key == "medicines" and isinstance(val, list):
+            return [{"name": v} if isinstance(v, str) else v for v in val]
+        if key == "tests" and isinstance(val, list):
+            return [{"name": v} if isinstance(v, str) else v for v in val]
+        if key == "line_items" and isinstance(val, list):
+            # require description + amount; pass through dicts as-is
+            return [v for v in val if isinstance(v, dict)]
+        return val
+
+    kwargs = {k: _coerce(k, v) for k, v in content.items() if k in schema.model_fields}
+    body = schema(**kwargs)
     return ParsedDocument(file_id=file_id, doc_type=doc_type, extracted=body, confidence=1.0)

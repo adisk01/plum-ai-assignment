@@ -13,6 +13,7 @@ class DecisionStatus(str, Enum):
     REJECTED = "REJECTED"
     NEEDS_REVIEW = "NEEDS_REVIEW"
     MANUAL_REVIEW = "MANUAL_REVIEW"
+    NEEDS_REUPLOAD = "NEEDS_REUPLOAD"
 
 
 class RuleResult(BaseModel):

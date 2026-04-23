@@ -63,14 +63,23 @@ def evaluate_claim(
     modality = _extract(claim.documents, DocType.DIAGNOSTIC_REPORT, "modality") or ""
     hospital = _extract(claim.documents, DocType.HOSPITAL_BILL, "hospital_name") or ""
 
+    # Pre-auth signal can appear in tests_ordered or line-item descriptions
+    tests_ordered = _extract(claim.documents, DocType.PRESCRIPTION, "tests_ordered") or []
+    line_items = _all_line_items(claim.documents)
+    pre_auth_text = " | ".join([
+        modality, diagnosis,
+        *tests_ordered,
+        *(getattr(li, "description", "") or "" for li in line_items),
+    ])
+
     results.append(rules.check_category_covered(category))
     results.append(rules.check_minimum_amount(claimed_amount))
     results.append(rules.check_per_claim_limit(claimed_amount))
     results.append(rules.check_submission_deadline(treatment_date, submission_date))
     if member_join_date:
         results.append(rules.check_waiting_period(member_join_date, treatment_date, diagnosis))
-    results.append(rules.check_pre_auth(category, claimed_amount, modality or diagnosis, pre_auth_provided))
-    results.append(rules.check_exclusions(category, _all_line_items(claim.documents), diagnosis))
+    results.append(rules.check_pre_auth(category, claimed_amount, pre_auth_text, pre_auth_provided))
+    results.append(rules.check_exclusions(category, line_items, diagnosis))
     network_rule = rules.check_network_hospital(hospital)
     results.append(network_rule)
 

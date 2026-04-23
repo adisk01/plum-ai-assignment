@@ -68,6 +68,8 @@ def check_submission_deadline(treatment_date, submission_date=None, policy=None)
     days = policy["submission_rules"]["deadline_days_from_treatment"]
     td = _parse_date(treatment_date) if isinstance(treatment_date, str) else treatment_date
     sd = submission_date or date.today()
+    if isinstance(sd, str):
+        sd = _parse_date(sd) or date.today()
     if not td:
         return RuleResult(code="SUBMISSION_DEADLINE", passed=True, severity="warning",
                           message="Treatment date unknown; cannot verify deadline")
@@ -100,10 +102,12 @@ def check_waiting_period(member_join_date, treatment_date, diagnosis, policy=Non
             evidence={"join_date": str(jd), "treatment_date": str(td)},
         )
 
-    # Condition-specific
+    # Condition-specific (word-boundary match to avoid "hernia" matching "herniation")
+    import re
     dx = (diagnosis or "").lower()
     for cond, days in waiting.get("specific_conditions", {}).items():
-        if cond.replace("_", " ") in dx or cond in dx:
+        pattern = r"\b" + re.escape(cond.replace("_", " ")) + r"\b"
+        if re.search(pattern, dx):
             if (td - jd).days < days:
                 return RuleResult(
                     code="WAITING_PERIOD", passed=False, severity="error",
@@ -139,27 +143,45 @@ def check_pre_auth(category, claimed_amount, diagnosis_or_modality, pre_auth_pro
     )
 
 
+_STOPWORDS = {"and", "or", "of", "the", "non", "medically", "necessary",
+              "programs", "treatment", "treatments", "assisted", "surgery"}
+
+
+def _keywords(phrase):
+    """Pull significant tokens out of an exclusion phrase for substring matching."""
+    toks = [t.strip("()[],.").lower() for t in phrase.split()]
+    return [t for t in toks if t and t not in _STOPWORDS and len(t) > 3]
+
+
 def check_exclusions(category, line_items, diagnosis, policy=None):
-    """TC006 (dental): reject if any line item is in the category's excluded list
-    or matches a general exclusion keyword.
+    """TC006/TC012: reject if any line item or the diagnosis matches an
+    excluded procedure (category-specific) or exclusion keyword (general).
     """
     policy = policy or config.load_policy_terms()
     cat = _category_config(category, policy)
-    excluded = [x.lower() for x in cat.get("excluded_procedures", []) + cat.get("excluded_items", [])]
-    general = [x.lower() for x in policy["exclusions"].get("conditions", [])]
+    # Category-specific lists are short phrases — match by full-phrase substring.
+    cat_excluded = [x.lower() for x in cat.get("excluded_procedures", []) + cat.get("excluded_items", [])]
+    # General lists are long phrases — break into keywords.
+    general_phrases = policy["exclusions"].get("conditions", [])
+    general_kw = [(p, _keywords(p)) for p in general_phrases]
 
     hits = []
     for item in line_items or []:
         desc = (getattr(item, "description", "") or "").lower()
-        for ex in excluded + general:
+        for ex in cat_excluded:
             if ex and ex in desc:
                 hits.append({"item": item.description, "matched": ex})
                 break
+        else:
+            for phrase, kws in general_kw:
+                if kws and any(k in desc for k in kws):
+                    hits.append({"item": item.description, "matched": phrase})
+                    break
 
     dx = (diagnosis or "").lower()
-    for ex in general:
-        if ex and ex in dx:
-            hits.append({"diagnosis": diagnosis, "matched": ex})
+    for phrase, kws in general_kw:
+        if kws and any(k in dx for k in kws):
+            hits.append({"diagnosis": diagnosis, "matched": phrase})
 
     ok = not hits
     return RuleResult(
