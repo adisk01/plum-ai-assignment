@@ -10,6 +10,7 @@ from claims_processor.models.fraud import FraudReport
 
 class DecisionStatus(str, Enum):
     APPROVED = "APPROVED"
+    PARTIAL = "PARTIAL"
     REJECTED = "REJECTED"
     NEEDS_REVIEW = "NEEDS_REVIEW"
     MANUAL_REVIEW = "MANUAL_REVIEW"
@@ -24,12 +25,21 @@ class RuleResult(BaseModel):
     evidence: dict = Field(default_factory=dict)
 
 
+class LineItemDecision(BaseModel):
+    description: str
+    amount: float
+    covered: bool
+    reason: str = ""   # why this item was excluded (if covered=False)
+
+
 class PayableBreakdown(BaseModel):
-    claimed_amount: float
+    claimed_amount: float                         # gross claim / sum of all line items
+    after_exclusions: Optional[float] = None      # sum of covered line items only
     after_network_discount: float
     after_sub_limit: float
     copay_amount: float
     payable: float
+    line_items: list[LineItemDecision] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
 
 

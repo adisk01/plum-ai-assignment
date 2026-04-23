@@ -12,6 +12,9 @@ python-dotenv>=1.0.0
 # Graph orchestration
 langgraph>=0.2.0
 
+# Engineering-level tracing (optional; activated by LANGSMITH_TRACING=true)
+langsmith>=0.1.0
+
 # PDF parsing
 pypdfium2>=4.0.0
 
@@ -21,3 +24,6 @@ pytest-mock>=3.10.0
 
 # Fixture generation (tiny test PDFs)
 fpdf2>=2.7.0
+
+# UI
+gradio>=4.0.0

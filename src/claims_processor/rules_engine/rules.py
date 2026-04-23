@@ -49,18 +49,47 @@ def check_minimum_amount(claimed_amount, policy=None):
     )
 
 
-def check_per_claim_limit(claimed_amount, policy=None):
-    """TC008: amount > per_claim_limit -> REJECTED."""
+def check_per_claim_limit(claimed_amount, policy=None, category=None, covered_amount=None):
+    """TC008: amount over the effective per-claim cap -> REJECTED.
+
+    Effective cap = max(coverage.per_claim_limit, category.sub_limit).
+    Rationale: a category's explicit sub-limit (e.g. DENTAL=10000) signals
+    intent to allow larger claims than the generic coverage cap; the
+    generic cap is only binding when it exceeds the category sub-limit
+    (e.g. CONSULTATION sub_limit=2000 < per_claim_limit=5000, so 5000 wins).
+
+    When `covered_amount` is supplied (sum of line items after exclusions),
+    the cap is evaluated against that rather than the gross claim — so a
+    mixed bill where the covered portion fits but the gross doesn't can
+    still PARTIAL-approve.
+    """
     policy = policy or config.load_policy_terms()
-    limit = policy["coverage"]["per_claim_limit"]
-    ok = claimed_amount <= limit
+    base_limit = policy["coverage"]["per_claim_limit"]
+    sub_limit = None
+    if category:
+        cat = policy["opd_categories"].get(category.lower(), {})
+        sub_limit = cat.get("sub_limit")
+
+    effective = max(base_limit, sub_limit) if sub_limit is not None else base_limit
+    check_amount = covered_amount if covered_amount is not None else claimed_amount
+    ok = check_amount <= effective
+    scope = "covered" if covered_amount is not None else "claimed"
     return RuleResult(
         code="PER_CLAIM_LIMIT",
         passed=ok,
         severity="error" if not ok else "info",
-        message=f"Claim ₹{claimed_amount} exceeds per-claim limit ₹{limit}" if not ok
-                else f"Claim ₹{claimed_amount} within per-claim limit ₹{limit}",
-        evidence={"limit": limit, "claimed": claimed_amount},
+        message=(
+            f"{scope.capitalize()} ₹{check_amount} exceeds effective per-claim limit ₹{effective}"
+            if not ok else
+            f"{scope.capitalize()} ₹{check_amount} within effective per-claim limit ₹{effective}"
+        ),
+        evidence={
+            "per_claim_limit": base_limit,
+            "category_sub_limit": sub_limit,
+            "effective_limit": effective,
+            "checked": check_amount,
+            "scope": scope,
+        },
     )
 
 
@@ -155,8 +184,17 @@ def _keywords(phrase):
 
 
 def check_exclusions(category, line_items, diagnosis, policy=None):
-    """TC006/TC012: reject if any line item or the diagnosis matches an
-    excluded procedure (category-specific) or exclusion keyword (general).
+    """TC006/TC012: detect excluded line items or diagnoses.
+
+    Semantics:
+      - No hits → passed=True (info).
+      - Diagnosis matches general exclusion → passed=False, severity=error
+        (whole treatment uncovered regardless of bill composition).
+      - All line items excluded → passed=False, severity=error (nothing payable).
+      - Some items excluded, others covered → passed=False, severity=partial.
+        This is a non-blocking signal; `compute_payable` uses the evidence
+        list to pay only the covered items, producing a PARTIAL decision.
+    `evidence.excluded_descriptions` is consumed by the financial layer.
     """
     policy = policy or config.load_policy_terms()
     cat = _category_config(category, policy)
@@ -166,31 +204,59 @@ def check_exclusions(category, line_items, diagnosis, policy=None):
     general_phrases = policy["exclusions"].get("conditions", [])
     general_kw = [(p, _keywords(p)) for p in general_phrases]
 
-    hits = []
+    item_hits = []
+    excluded_descs = []
     for item in line_items or []:
-        desc = (getattr(item, "description", "") or "").lower()
+        desc_orig = getattr(item, "description", "") or ""
+        desc = desc_orig.lower()
+        matched = None
         for ex in cat_excluded:
             if ex and ex in desc:
-                hits.append({"item": item.description, "matched": ex})
+                matched = ex
                 break
-        else:
+        if matched is None:
             for phrase, kws in general_kw:
                 if kws and any(k in desc for k in kws):
-                    hits.append({"item": item.description, "matched": phrase})
+                    matched = phrase
                     break
+        if matched:
+            item_hits.append({"item": desc_orig, "matched": matched})
+            excluded_descs.append(desc_orig)
 
+    dx_hits = []
     dx = (diagnosis or "").lower()
     for phrase, kws in general_kw:
         if kws and any(k in dx for k in kws):
-            hits.append({"diagnosis": diagnosis, "matched": phrase})
+            dx_hits.append({"diagnosis": diagnosis, "matched": phrase})
 
-    ok = not hits
+    total_items = len(line_items or [])
+    excluded_count = len(item_hits)
+
+    if not item_hits and not dx_hits:
+        return RuleResult(
+            code="EXCLUSIONS", passed=True, severity="info",
+            message="No excluded items",
+            evidence={"hits": [], "excluded_descriptions": []},
+        )
+
+    if dx_hits:
+        return RuleResult(
+            code="EXCLUSIONS", passed=False, severity="error",
+            message=f"Diagnosis matches policy exclusion: {dx_hits[0]['matched']}",
+            evidence={"hits": item_hits + dx_hits, "excluded_descriptions": excluded_descs},
+        )
+
+    if total_items > 0 and excluded_count == total_items:
+        return RuleResult(
+            code="EXCLUSIONS", passed=False, severity="error",
+            message=f"All {total_items} line item(s) are excluded",
+            evidence={"hits": item_hits, "excluded_descriptions": excluded_descs},
+        )
+
     return RuleResult(
-        code="EXCLUSIONS",
-        passed=ok,
-        severity="error" if not ok else "info",
-        message=f"{len(hits)} excluded item(s) found" if hits else "No excluded items",
-        evidence={"hits": hits},
+        code="EXCLUSIONS", passed=False, severity="partial",
+        message=f"{excluded_count} of {total_items} line item(s) excluded; remainder payable",
+        evidence={"hits": item_hits, "excluded_descriptions": excluded_descs},
     )
 
 

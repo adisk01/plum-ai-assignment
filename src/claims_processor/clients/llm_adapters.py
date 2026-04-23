@@ -15,6 +15,7 @@ import json
 import os
 import time
 
+from langsmith import traceable
 from pydantic import BaseModel
 
 from claims_processor.core import config
@@ -74,6 +75,7 @@ def _traced(provider, model, kind, fn):
 
 # --- OpenAI -----------------------------------------------------------------
 
+@traceable(run_type="llm", name="openai")
 def call_openai(prompt, schema=None, images=None, model=None):
     from openai import OpenAI
 
@@ -112,6 +114,7 @@ def call_openai(prompt, schema=None, images=None, model=None):
 
 # --- Anthropic --------------------------------------------------------------
 
+@traceable(run_type="llm", name="anthropic")
 def call_anthropic(prompt, schema=None, images=None, model=None):
     from anthropic import Anthropic
 
@@ -159,6 +162,7 @@ def call_anthropic(prompt, schema=None, images=None, model=None):
 
 # --- Groq (text only) -------------------------------------------------------
 
+@traceable(run_type="llm", name="groq")
 def call_groq(prompt, schema=None, model=None):
     from groq import Groq
 

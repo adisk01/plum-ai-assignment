@@ -72,22 +72,39 @@ def evaluate_claim(
         *(getattr(li, "description", "") or "" for li in line_items),
     ])
 
+    exclusion_rule = rules.check_exclusions(category, line_items, diagnosis)
+    excluded_descs = exclusion_rule.evidence.get("excluded_descriptions", []) or []
+    excluded_set = {d.lower() for d in excluded_descs}
+    covered_amount = None
+    if line_items:
+        covered_amount = sum(
+            float(getattr(li, "amount", 0) or 0)
+            for li in line_items
+            if (getattr(li, "description", "") or "").lower() not in excluded_set
+        )
+
     results.append(rules.check_category_covered(category))
     results.append(rules.check_minimum_amount(claimed_amount))
-    results.append(rules.check_per_claim_limit(claimed_amount))
+    results.append(rules.check_per_claim_limit(
+        claimed_amount, category=category, covered_amount=covered_amount,
+    ))
     results.append(rules.check_submission_deadline(treatment_date, submission_date))
     if member_join_date:
         results.append(rules.check_waiting_period(member_join_date, treatment_date, diagnosis))
     results.append(rules.check_pre_auth(category, claimed_amount, pre_auth_text, pre_auth_provided))
-    results.append(rules.check_exclusions(category, line_items, diagnosis))
+    results.append(exclusion_rule)
     network_rule = rules.check_network_hospital(hospital)
     results.append(network_rule)
 
     has_error = any((not r.passed) and r.severity == "error" for r in results)
+    has_partial = any((not r.passed) and r.severity == "partial" for r in results)
     has_warning = any((not r.passed) and r.severity == "warning" for r in results)
 
     is_network = network_rule.evidence.get("in_network", False)
-    payable = financials.compute_payable(claimed_amount, category, is_network=is_network)
+    payable = financials.compute_payable(
+        claimed_amount, category, is_network=is_network,
+        line_items=line_items, excluded_descriptions=excluded_descs,
+    )
 
     fraud = detect_fraud(
         member_id=member_id,
@@ -104,6 +121,12 @@ def evaluate_claim(
         status = DecisionStatus.MANUAL_REVIEW
         top = max(fraud.signals, key=lambda s: s.weight)
         reason = f"Flagged for manual review: {top.message}"
+    elif has_partial:
+        status = DecisionStatus.PARTIAL
+        reason = (
+            f"{next(r.message for r in results if not r.passed and r.severity == 'partial')}. "
+            f"Approved ₹{payable.payable}."
+        )
     elif has_warning:
         status = DecisionStatus.NEEDS_REVIEW
         reason = next(r.message for r in results if not r.passed and r.severity == "warning")

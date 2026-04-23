@@ -8,6 +8,7 @@ Nodes:
 from typing import Any, Optional, TypedDict
 
 from langgraph.graph import END, StateGraph
+from langsmith import traceable
 
 from claims_processor.claim_assembler.assemble import assemble_claim
 from claims_processor.core import config
@@ -42,6 +43,7 @@ class GraphState(TypedDict, total=False):
 
 # ------------------------------- nodes -------------------------------
 
+@traceable(run_type="chain", name="parse")
 def parse_node(state: GraphState) -> dict:
     tracer = get_tracer()
     parsed, errors = [], []
@@ -101,6 +103,7 @@ def parse_node(state: GraphState) -> dict:
     return {"parsed_docs": parsed, "stage_errors": errors, "blocking": blocking}
 
 
+@traceable(run_type="chain", name="assemble")
 def assemble_node(state: GraphState) -> dict:
     tracer = get_tracer()
     ci = state["claim_input"]
@@ -156,21 +159,39 @@ def _run_rules(state: GraphState, tracer):
     submission_date = ci.get("submission_date") or ci.get("treatment_date")
     treatment_date = ci.get("treatment_date")
 
+    # Exclusions run first so the per-claim-limit check can operate on
+    # covered-only amount and so financials can itemise the bill.
+    exclusion_rule = rules.check_exclusions(category, line_items, diagnosis)
+    excluded_descs = exclusion_rule.evidence.get("excluded_descriptions", []) or []
+    excluded_set = {d.lower() for d in excluded_descs}
+
+    if line_items:
+        covered_amount = sum(
+            float(getattr(li, "amount", 0) or 0)
+            for li in line_items
+            if (getattr(li, "description", "") or "").lower() not in excluded_set
+        )
+    else:
+        covered_amount = None
+
     results = [
         rules.check_category_covered(category),
         rules.check_minimum_amount(claimed_amount),
-        rules.check_per_claim_limit(claimed_amount),
+        rules.check_per_claim_limit(claimed_amount, category=category, covered_amount=covered_amount),
         rules.check_submission_deadline(treatment_date, submission_date),
     ]
     if member_join_date:
         results.append(rules.check_waiting_period(member_join_date, treatment_date, diagnosis))
     results.append(rules.check_pre_auth(category, claimed_amount, pre_auth_text, pre_auth_provided))
-    results.append(rules.check_exclusions(category, line_items, diagnosis))
+    results.append(exclusion_rule)
     network_rule = rules.check_network_hospital(hospital)
     results.append(network_rule)
 
     is_network = network_rule.evidence.get("in_network", False)
-    payable = financials.compute_payable(claimed_amount, category, is_network=is_network)
+    payable = financials.compute_payable(
+        claimed_amount, category, is_network=is_network,
+        line_items=line_items, excluded_descriptions=excluded_descs,
+    )
 
     if tracer:
         for r in results:
@@ -180,18 +201,27 @@ def _run_rules(state: GraphState, tracer):
             )
         tracer.event("payable_computed",
                      claimed=payable.claimed_amount,
+                     after_exclusions=payable.after_exclusions,
                      after_network_discount=payable.after_network_discount,
                      after_sub_limit=payable.after_sub_limit,
                      copay=payable.copay_amount,
                      payable=payable.payable,
-                     is_network=is_network)
+                     is_network=is_network,
+                     excluded_items=[d for d in excluded_descs])
 
     has_error = any((not r.passed) and r.severity == "error" for r in results)
+    has_partial = any((not r.passed) and r.severity == "partial" for r in results)
     has_warning = any((not r.passed) and r.severity == "warning" for r in results)
 
     if has_error:
         status = DecisionStatus.REJECTED
         reason = next(r.message for r in results if not r.passed and r.severity == "error")
+    elif has_partial:
+        status = DecisionStatus.PARTIAL
+        reason = (
+            f"{next(r.message for r in results if not r.passed and r.severity == 'partial')}. "
+            f"Approved ₹{payable.payable}."
+        )
     elif has_warning:
         status = DecisionStatus.NEEDS_REVIEW
         reason = next(r.message for r in results if not r.passed and r.severity == "warning")
@@ -205,6 +235,7 @@ def _run_rules(state: GraphState, tracer):
     )
 
 
+@traceable(run_type="chain", name="rules")
 def rules_node(state: GraphState) -> dict:
     tracer = get_tracer()
     if tracer:
@@ -217,6 +248,7 @@ def rules_node(state: GraphState) -> dict:
     return {"decision": decision}
 
 
+@traceable(run_type="chain", name="fraud")
 def fraud_node(state: GraphState) -> dict:
     tracer = get_tracer()
     ci = state["claim_input"]
@@ -309,6 +341,7 @@ def _build_final(state: GraphState) -> FinalDecision:
     )
 
 
+@traceable(run_type="chain", name="finalize")
 def finalize_node(state: GraphState) -> dict:
     tracer = get_tracer()
     if tracer:
@@ -357,9 +390,17 @@ def build_graph():
 _graph = None
 
 
+@traceable(run_type="chain", name="run_graph")
 def run_graph(claim_input: dict, claim_id: str = "CLAIM",
               trace: bool = True) -> FinalDecision:
-    """Run the claims pipeline. Set trace=False to skip tracing entirely."""
+    """Run the claims pipeline. Set trace=False to skip tracing entirely.
+
+    LangSmith tracing (optional, engineering-level) is attached via
+    `@traceable` on this function and on each node. It activates when
+    `LANGSMITH_TRACING=true` and `LANGSMITH_API_KEY` are set; otherwise the
+    decorator is a no-op passthrough. Unrelated to the `Tracer` below,
+    which is always on and surfaces to `FinalDecision.trace`.
+    """
     global _graph
     if _graph is None:
         _graph = build_graph()
@@ -368,7 +409,18 @@ def run_graph(claim_input: dict, claim_id: str = "CLAIM",
     prev = get_tracer()
     set_tracer(tracer)
     try:
-        result = _graph.invoke({"claim_input": claim_input, "claim_id": claim_id})
+        result = _graph.invoke(
+            {"claim_input": claim_input, "claim_id": claim_id},
+            config={
+                "metadata": {
+                    "claim_id": claim_id,
+                    "category": claim_input.get("claim_category"),
+                    "member_id": claim_input.get("member_id"),
+                },
+                "tags": ["plum-claims", f"claim:{claim_id}"],
+                "run_name": f"claim.{claim_id}",
+            },
+        )
     finally:
         set_tracer(prev)
 
