@@ -7,7 +7,7 @@ dates are ISO strings. Downstream layers validate against policy rules.
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_serializer
 
 
 class DocType(str, Enum):
@@ -140,11 +140,14 @@ class ParsedDocument(BaseModel):
     extracted: Optional[BaseModel] = None
     confidence: float = 0.0
 
-    def model_dump(self, **kwargs):
-        data = super().model_dump(**{k: v for k, v in kwargs.items() if k != "mode"})
-        if self.extracted is not None:
-            data["extracted"] = self.extracted.model_dump(mode=kwargs.get("mode", "python"))
-        return data
+    @model_serializer
+    def _ser(self):
+        return {
+            "file_id": self.file_id,
+            "doc_type": self.doc_type.value,
+            "extracted": self.extracted.model_dump() if self.extracted else None,
+            "confidence": self.confidence,
+        }
 
 
 SCHEMA_FOR_DOC_TYPE = {
