@@ -1,0 +1,4635 @@
+{
+  "summary": [
+    {
+      "case_id": "TC001",
+      "description": "Member submits two prescriptions for a consultation claim that requires a prescription and a hospital bill.",
+      "expected": null,
+      "actual": "REJECTED",
+      "match": true,
+      "payable": null,
+      "confidence": 0.5,
+      "reason": "Claim has consistency errors; rejecting before policy rules.",
+      "trace_ms": 2.4,
+      "span_count": 3
+    },
+    {
+      "case_id": "TC002",
+      "description": "Member uploads a valid prescription but a blurry, unreadable photo of their pharmacy bill.",
+      "expected": null,
+      "actual": "REJECTED",
+      "match": true,
+      "payable": null,
+      "confidence": 0.5,
+      "reason": "Claim has consistency errors; rejecting before policy rules.",
+      "trace_ms": 0.6,
+      "span_count": 3
+    },
+    {
+      "case_id": "TC003",
+      "description": "The prescription is for Rajesh Kumar but the hospital bill is for a different patient, Arjun Mehta.",
+      "expected": null,
+      "actual": "REJECTED",
+      "match": true,
+      "payable": null,
+      "confidence": 0.5,
+      "reason": "Claim has consistency errors; rejecting before policy rules.",
+      "trace_ms": 0.5,
+      "span_count": 3
+    },
+    {
+      "case_id": "TC004",
+      "description": "Complete, valid consultation claim with correct documents, valid member, covered treatment, within all limits.",
+      "expected": "APPROVED",
+      "actual": "APPROVED",
+      "match": true,
+      "payable": 1350.0,
+      "confidence": 1.0,
+      "reason": "All rules passed. Payable \u20b91350.0.",
+      "trace_ms": 2.5,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC005",
+      "description": "Member joined 2024-09-01. Claims for diabetes treatment on 2024-10-15, which is within the 90-day waiting period for diabetes.",
+      "expected": "REJECTED",
+      "actual": "REJECTED",
+      "match": true,
+      "payable": 1800.0,
+      "confidence": 1.0,
+      "reason": "diabetes waiting period not met (44d < 90d)",
+      "trace_ms": 1.7,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC006",
+      "description": "Bill includes root canal treatment (covered) and teeth whitening (cosmetic, excluded). System must approve only the covered procedure.",
+      "expected": "PARTIAL",
+      "actual": "REJECTED",
+      "match": false,
+      "payable": 10000.0,
+      "confidence": 1.0,
+      "reason": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+      "trace_ms": 1.5,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC007",
+      "description": "MRI scan costing \u20b915,000 submitted without pre-authorization. Policy requires pre-auth for MRI above \u20b910,000.",
+      "expected": "REJECTED",
+      "actual": "REJECTED",
+      "match": true,
+      "payable": 10000.0,
+      "confidence": 1.0,
+      "reason": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
+      "trace_ms": 1.3,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC008",
+      "description": "Claimed amount of \u20b97,500 exceeds the per-claim limit of \u20b95,000.",
+      "expected": "REJECTED",
+      "actual": "REJECTED",
+      "match": true,
+      "payable": 1800.0,
+      "confidence": 1.0,
+      "reason": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
+      "trace_ms": 1.3,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC009",
+      "description": "Member EMP008 has already submitted 3 claims today before this one arrives. This is the 4th claim from the same member on the same day.",
+      "expected": "MANUAL_REVIEW",
+      "actual": "MANUAL_REVIEW",
+      "match": true,
+      "payable": 1800.0,
+      "confidence": 1.0,
+      "reason": "Flagged for manual review: 4 claims on 2024-10-30 (limit 2)",
+      "trace_ms": 1.4,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC010",
+      "description": "Valid claim at Apollo Hospitals, a network hospital. Network discount must be applied before co-pay.",
+      "expected": "APPROVED",
+      "actual": "APPROVED",
+      "match": true,
+      "payable": 1800.0,
+      "confidence": 1.0,
+      "reason": "All rules passed. Payable \u20b91800.0.",
+      "trace_ms": 1.2,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC011",
+      "description": "One component of your system fails mid-processing (simulate with the flag below). The overall pipeline must continue, produce a decision, and make the failure visible in the output with an appropriately reduced confidence score.",
+      "expected": "APPROVED",
+      "actual": "APPROVED",
+      "match": true,
+      "payable": 4000.0,
+      "confidence": 0.7,
+      "reason": "All rules passed. Payable \u20b94000.0.",
+      "trace_ms": 1.3,
+      "span_count": 5
+    },
+    {
+      "case_id": "TC012",
+      "description": "Member claims for bariatric consultation and a diet program. Obesity treatment is explicitly excluded under the policy.",
+      "expected": "REJECTED",
+      "actual": "REJECTED",
+      "match": true,
+      "payable": 1800.0,
+      "confidence": 1.0,
+      "reason": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+      "trace_ms": 1.4,
+      "span_count": 5
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "TC001",
+      "description": "Member submits two prescriptions for a consultation claim that requires a prescription and a hospital bill.",
+      "expected": null,
+      "final": {
+        "claim_id": "TC001",
+        "status": "REJECTED",
+        "reason": "Claim has consistency errors; rejecting before policy rules.",
+        "confidence": 0.5,
+        "claim": {
+          "claim_id": "TC001",
+          "category": "CONSULTATION",
+          "documents": [],
+          "issues": [
+            {
+              "code": "MISSING_REQUIRED_DOCUMENT",
+              "severity": "error",
+              "message": "Required document 'PRESCRIPTION' missing for category CONSULTATION",
+              "evidence": {
+                "category": "CONSULTATION",
+                "missing": "PRESCRIPTION"
+              }
+            },
+            {
+              "code": "MISSING_REQUIRED_DOCUMENT",
+              "severity": "error",
+              "message": "Required document 'HOSPITAL_BILL' missing for category CONSULTATION",
+              "evidence": {
+                "category": "CONSULTATION",
+                "missing": "HOSPITAL_BILL"
+              }
+            }
+          ],
+          "missing_documents": [
+            "PRESCRIPTION",
+            "HOSPITAL_BILL"
+          ]
+        },
+        "decision": null,
+        "stage_errors": [
+          {
+            "stage": "parse",
+            "file_id": "F001",
+            "error_type": "InvalidInput",
+            "message": "document has neither content nor file_path"
+          },
+          {
+            "stage": "parse",
+            "file_id": "F002",
+            "error_type": "InvalidInput",
+            "message": "document has neither content nor file_path"
+          }
+        ],
+        "notes": [],
+        "trace": {
+          "trace_id": "0af6d6d04881",
+          "claim_id": "TC001",
+          "started_at": "2026-04-23T20:47:21.340866+00:00",
+          "ended_at": "2026-04-23T20:47:21.343384+00:00",
+          "duration_ms": 2.41,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.342310+00:00",
+              "ended_at": "2026-04-23T20:47:21.342712+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_error",
+                  "at": "2026-04-23T20:47:21.342703+00:00",
+                  "attrs": {
+                    "file_id": "F001",
+                    "error_type": "InvalidInput"
+                  }
+                },
+                {
+                  "name": "doc_error",
+                  "at": "2026-04-23T20:47:21.342709+00:00",
+                  "attrs": {
+                    "file_id": "F002",
+                    "error_type": "InvalidInput"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 0,
+                "errors": 2
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.342912+00:00",
+              "ended_at": "2026-04-23T20:47:21.343163+00:00",
+              "duration_ms": 0.25,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "consistency_issue",
+                  "at": "2026-04-23T20:47:21.343154+00:00",
+                  "attrs": {
+                    "code": "MISSING_REQUIRED_DOCUMENT",
+                    "severity": "error",
+                    "message": "Required document 'PRESCRIPTION' missing for category CONSULTATION"
+                  }
+                },
+                {
+                  "name": "consistency_issue",
+                  "at": "2026-04-23T20:47:21.343157+00:00",
+                  "attrs": {
+                    "code": "MISSING_REQUIRED_DOCUMENT",
+                    "severity": "error",
+                    "message": "Required document 'HOSPITAL_BILL' missing for category CONSULTATION"
+                  }
+                },
+                {
+                  "name": "missing_documents",
+                  "at": "2026-04-23T20:47:21.343159+00:00",
+                  "attrs": {
+                    "missing": [
+                      "PRESCRIPTION",
+                      "HOSPITAL_BILL"
+                    ]
+                  }
+                }
+              ],
+              "attrs": {
+                "issue_count": 2,
+                "missing_docs": 2,
+                "has_errors": true
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.343298+00:00",
+              "ended_at": "2026-04-23T20:47:21.343307+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 0.5,
+                "stage_errors": 2
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC002",
+      "description": "Member uploads a valid prescription but a blurry, unreadable photo of their pharmacy bill.",
+      "expected": null,
+      "final": {
+        "claim_id": "TC002",
+        "status": "REJECTED",
+        "reason": "Claim has consistency errors; rejecting before policy rules.",
+        "confidence": 0.5,
+        "claim": {
+          "claim_id": "TC002",
+          "category": "PHARMACY",
+          "documents": [],
+          "issues": [
+            {
+              "code": "MISSING_REQUIRED_DOCUMENT",
+              "severity": "error",
+              "message": "Required document 'PRESCRIPTION' missing for category PHARMACY",
+              "evidence": {
+                "category": "PHARMACY",
+                "missing": "PRESCRIPTION"
+              }
+            },
+            {
+              "code": "MISSING_REQUIRED_DOCUMENT",
+              "severity": "error",
+              "message": "Required document 'PHARMACY_BILL' missing for category PHARMACY",
+              "evidence": {
+                "category": "PHARMACY",
+                "missing": "PHARMACY_BILL"
+              }
+            }
+          ],
+          "missing_documents": [
+            "PRESCRIPTION",
+            "PHARMACY_BILL"
+          ]
+        },
+        "decision": null,
+        "stage_errors": [
+          {
+            "stage": "parse",
+            "file_id": "F003",
+            "error_type": "InvalidInput",
+            "message": "document has neither content nor file_path"
+          },
+          {
+            "stage": "parse",
+            "file_id": "F004",
+            "error_type": "InvalidInput",
+            "message": "document has neither content nor file_path"
+          }
+        ],
+        "notes": [],
+        "trace": {
+          "trace_id": "ccd4ae166e9c",
+          "claim_id": "TC002",
+          "started_at": "2026-04-23T20:47:21.343435+00:00",
+          "ended_at": "2026-04-23T20:47:21.344036+00:00",
+          "duration_ms": 0.6,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.343656+00:00",
+              "ended_at": "2026-04-23T20:47:21.343671+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_error",
+                  "at": "2026-04-23T20:47:21.343665+00:00",
+                  "attrs": {
+                    "file_id": "F003",
+                    "error_type": "InvalidInput"
+                  }
+                },
+                {
+                  "name": "doc_error",
+                  "at": "2026-04-23T20:47:21.343669+00:00",
+                  "attrs": {
+                    "file_id": "F004",
+                    "error_type": "InvalidInput"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 0,
+                "errors": 2
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.343786+00:00",
+              "ended_at": "2026-04-23T20:47:21.343866+00:00",
+              "duration_ms": 0.08,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "consistency_issue",
+                  "at": "2026-04-23T20:47:21.343859+00:00",
+                  "attrs": {
+                    "code": "MISSING_REQUIRED_DOCUMENT",
+                    "severity": "error",
+                    "message": "Required document 'PRESCRIPTION' missing for category PHARMACY"
+                  }
+                },
+                {
+                  "name": "consistency_issue",
+                  "at": "2026-04-23T20:47:21.343861+00:00",
+                  "attrs": {
+                    "code": "MISSING_REQUIRED_DOCUMENT",
+                    "severity": "error",
+                    "message": "Required document 'PHARMACY_BILL' missing for category PHARMACY"
+                  }
+                },
+                {
+                  "name": "missing_documents",
+                  "at": "2026-04-23T20:47:21.343863+00:00",
+                  "attrs": {
+                    "missing": [
+                      "PRESCRIPTION",
+                      "PHARMACY_BILL"
+                    ]
+                  }
+                }
+              ],
+              "attrs": {
+                "issue_count": 2,
+                "missing_docs": 2,
+                "has_errors": true
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.343970+00:00",
+              "ended_at": "2026-04-23T20:47:21.343978+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 0.5,
+                "stage_errors": 2
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC003",
+      "description": "The prescription is for Rajesh Kumar but the hospital bill is for a different patient, Arjun Mehta.",
+      "expected": null,
+      "final": {
+        "claim_id": "TC003",
+        "status": "REJECTED",
+        "reason": "Claim has consistency errors; rejecting before policy rules.",
+        "confidence": 0.5,
+        "claim": {
+          "claim_id": "TC003",
+          "category": "CONSULTATION",
+          "documents": [],
+          "issues": [
+            {
+              "code": "MISSING_REQUIRED_DOCUMENT",
+              "severity": "error",
+              "message": "Required document 'PRESCRIPTION' missing for category CONSULTATION",
+              "evidence": {
+                "category": "CONSULTATION",
+                "missing": "PRESCRIPTION"
+              }
+            },
+            {
+              "code": "MISSING_REQUIRED_DOCUMENT",
+              "severity": "error",
+              "message": "Required document 'HOSPITAL_BILL' missing for category CONSULTATION",
+              "evidence": {
+                "category": "CONSULTATION",
+                "missing": "HOSPITAL_BILL"
+              }
+            }
+          ],
+          "missing_documents": [
+            "PRESCRIPTION",
+            "HOSPITAL_BILL"
+          ]
+        },
+        "decision": null,
+        "stage_errors": [
+          {
+            "stage": "parse",
+            "file_id": "F005",
+            "error_type": "InvalidInput",
+            "message": "document has neither content nor file_path"
+          },
+          {
+            "stage": "parse",
+            "file_id": "F006",
+            "error_type": "InvalidInput",
+            "message": "document has neither content nor file_path"
+          }
+        ],
+        "notes": [],
+        "trace": {
+          "trace_id": "00d6941cc11d",
+          "claim_id": "TC003",
+          "started_at": "2026-04-23T20:47:21.344067+00:00",
+          "ended_at": "2026-04-23T20:47:21.344606+00:00",
+          "duration_ms": 0.54,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.344239+00:00",
+              "ended_at": "2026-04-23T20:47:21.344250+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_error",
+                  "at": "2026-04-23T20:47:21.344245+00:00",
+                  "attrs": {
+                    "file_id": "F005",
+                    "error_type": "InvalidInput"
+                  }
+                },
+                {
+                  "name": "doc_error",
+                  "at": "2026-04-23T20:47:21.344248+00:00",
+                  "attrs": {
+                    "file_id": "F006",
+                    "error_type": "InvalidInput"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 0,
+                "errors": 2
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.344360+00:00",
+              "ended_at": "2026-04-23T20:47:21.344437+00:00",
+              "duration_ms": 0.07,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "consistency_issue",
+                  "at": "2026-04-23T20:47:21.344430+00:00",
+                  "attrs": {
+                    "code": "MISSING_REQUIRED_DOCUMENT",
+                    "severity": "error",
+                    "message": "Required document 'PRESCRIPTION' missing for category CONSULTATION"
+                  }
+                },
+                {
+                  "name": "consistency_issue",
+                  "at": "2026-04-23T20:47:21.344432+00:00",
+                  "attrs": {
+                    "code": "MISSING_REQUIRED_DOCUMENT",
+                    "severity": "error",
+                    "message": "Required document 'HOSPITAL_BILL' missing for category CONSULTATION"
+                  }
+                },
+                {
+                  "name": "missing_documents",
+                  "at": "2026-04-23T20:47:21.344434+00:00",
+                  "attrs": {
+                    "missing": [
+                      "PRESCRIPTION",
+                      "HOSPITAL_BILL"
+                    ]
+                  }
+                }
+              ],
+              "attrs": {
+                "issue_count": 2,
+                "missing_docs": 2,
+                "has_errors": true
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.344544+00:00",
+              "ended_at": "2026-04-23T20:47:21.344550+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 0.5,
+                "stage_errors": 2
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC004",
+      "description": "Complete, valid consultation claim with correct documents, valid member, covered treatment, within all limits.",
+      "expected": "APPROVED",
+      "final": {
+        "claim_id": "TC004",
+        "status": "APPROVED",
+        "reason": "All rules passed. Payable \u20b91350.0.",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC004",
+          "category": "CONSULTATION",
+          "documents": [
+            {
+              "file_id": "F007",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Dr. Arun Sharma",
+                "doctor_registration": "KA/45678/2015",
+                "doctor_specialization": null,
+                "patient_name": "Rajesh Kumar",
+                "patient_age": null,
+                "patient_gender": null,
+                "date": "2024-11-01",
+                "diagnosis": "Viral Fever",
+                "medicines": [
+                  {
+                    "name": "Paracetamol 650mg",
+                    "dosage": null,
+                    "duration": null
+                  },
+                  {
+                    "name": "Vitamin C 500mg",
+                    "dosage": null,
+                    "duration": null
+                  }
+                ],
+                "tests_ordered": [],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F008",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": "City Clinic, Bengaluru",
+                "gstin": null,
+                "bill_number": null,
+                "date": "2024-11-01",
+                "patient_name": "Rajesh Kumar",
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [
+                  {
+                    "description": "Consultation Fee",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 1000.0
+                  },
+                  {
+                    "description": "CBC Test",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 300.0
+                  },
+                  {
+                    "description": "Dengue NS1 Test",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 200.0
+                  }
+                ],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 1500.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC004",
+          "status": "APPROVED",
+          "reason": "All rules passed. Payable \u20b91350.0.",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category CONSULTATION covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 1500 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 1500
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim \u20b91500 within per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 1500
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-11-01",
+                "submission_date": "2024-11-01",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 1500,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": true,
+              "severity": "info",
+              "message": "No excluded items",
+              "evidence": {
+                "hits": []
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "Out-of-network: City Clinic, Bengaluru",
+              "evidence": {
+                "in_network": false
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 1500.0,
+            "after_network_discount": 1500.0,
+            "after_sub_limit": 1500.0,
+            "copay_amount": 150.0,
+            "payable": 1350.0,
+            "notes": [
+              "Applied 10% copay (\u20b9150.0)"
+            ]
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 1500,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "0918da776625",
+          "claim_id": "TC004",
+          "started_at": "2026-04-23T20:47:21.344633+00:00",
+          "ended_at": "2026-04-23T20:47:21.347160+00:00",
+          "duration_ms": 2.53,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.344799+00:00",
+              "ended_at": "2026-04-23T20:47:21.344839+00:00",
+              "duration_ms": 0.04,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.344821+00:00",
+                  "attrs": {
+                    "file_id": "F007",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.344837+00:00",
+                  "attrs": {
+                    "file_id": "F008",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 2,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.344950+00:00",
+              "ended_at": "2026-04-23T20:47:21.345023+00:00",
+              "duration_ms": 0.07,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.345155+00:00",
+              "ended_at": "2026-04-23T20:47:21.346574+00:00",
+              "duration_ms": 1.42,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346547+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category CONSULTATION covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346551+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 1500 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346554+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim \u20b91500 within per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346556+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346558+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346560+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346562+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "No excluded items"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.346564+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Out-of-network: City Clinic, Bengaluru"
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.346566+00:00",
+                  "attrs": {
+                    "claimed": 1500.0,
+                    "after_network_discount": 1500.0,
+                    "after_sub_limit": 1500.0,
+                    "copay": 150.0,
+                    "payable": 1350.0,
+                    "is_network": false
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "APPROVED",
+                "payable": 1350.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.346705+00:00",
+              "ended_at": "2026-04-23T20:47:21.346989+00:00",
+              "duration_ms": 0.28,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.346793+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.346796+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.346798+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.346986+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.347087+00:00",
+              "ended_at": "2026-04-23T20:47:21.347101+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "APPROVED",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC005",
+      "description": "Member joined 2024-09-01. Claims for diabetes treatment on 2024-10-15, which is within the 90-day waiting period for diabetes.",
+      "expected": "REJECTED",
+      "final": {
+        "claim_id": "TC005",
+        "status": "REJECTED",
+        "reason": "diabetes waiting period not met (44d < 90d)",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC005",
+          "category": "CONSULTATION",
+          "documents": [
+            {
+              "file_id": "F009",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Dr. Sunil Mehta",
+                "doctor_registration": "GJ/56789/2014",
+                "doctor_specialization": null,
+                "patient_name": "Vikram Joshi",
+                "patient_age": null,
+                "patient_gender": null,
+                "date": null,
+                "diagnosis": "Type 2 Diabetes Mellitus",
+                "medicines": [
+                  {
+                    "name": "Metformin 500mg",
+                    "dosage": null,
+                    "duration": null
+                  },
+                  {
+                    "name": "Glimepiride 1mg",
+                    "dosage": null,
+                    "duration": null
+                  }
+                ],
+                "tests_ordered": [],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F010",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": null,
+                "gstin": null,
+                "bill_number": null,
+                "date": "2024-10-15",
+                "patient_name": "Vikram Joshi",
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 3000.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC005",
+          "status": "REJECTED",
+          "reason": "diabetes waiting period not met (44d < 90d)",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category CONSULTATION covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 3000 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 3000
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim \u20b93000 within per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 3000
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-10-15",
+                "submission_date": "2024-10-15",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": false,
+              "severity": "error",
+              "message": "diabetes waiting period not met (44d < 90d)",
+              "evidence": {
+                "condition": "diabetes",
+                "required_days": 90,
+                "actual_days": 44
+              }
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 3000,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": true,
+              "severity": "info",
+              "message": "No excluded items",
+              "evidence": {
+                "hits": []
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "In-network: ",
+              "evidence": {
+                "in_network": true
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 3000.0,
+            "after_network_discount": 2400.0,
+            "after_sub_limit": 2000.0,
+            "copay_amount": 200.0,
+            "payable": 1800.0,
+            "notes": [
+              "Applied 20% network discount",
+              "Capped at category sub-limit \u20b92000",
+              "Applied 10% copay (\u20b9200.0)"
+            ]
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 3000,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "958b3122a47d",
+          "claim_id": "TC005",
+          "started_at": "2026-04-23T20:47:21.347378+00:00",
+          "ended_at": "2026-04-23T20:47:21.349120+00:00",
+          "duration_ms": 1.74,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.347582+00:00",
+              "ended_at": "2026-04-23T20:47:21.347607+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.347597+00:00",
+                  "attrs": {
+                    "file_id": "F009",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.347605+00:00",
+                  "attrs": {
+                    "file_id": "F010",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 2,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.347728+00:00",
+              "ended_at": "2026-04-23T20:47:21.347803+00:00",
+              "duration_ms": 0.07,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.347914+00:00",
+              "ended_at": "2026-04-23T20:47:21.348666+00:00",
+              "duration_ms": 0.75,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348636+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category CONSULTATION covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348642+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 3000 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348644+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim \u20b93000 within per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348646+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348648+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "diabetes waiting period not met (44d < 90d)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348650+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348651+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "No excluded items"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.348653+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "In-network: "
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.348656+00:00",
+                  "attrs": {
+                    "claimed": 3000.0,
+                    "after_network_discount": 2400.0,
+                    "after_sub_limit": 2000.0,
+                    "copay": 200.0,
+                    "payable": 1800.0,
+                    "is_network": true
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "REJECTED",
+                "payable": 1800.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.348817+00:00",
+              "ended_at": "2026-04-23T20:47:21.348927+00:00",
+              "duration_ms": 0.11,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.348919+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.348922+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.348923+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.348925+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.349037+00:00",
+              "ended_at": "2026-04-23T20:47:21.349053+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC006",
+      "description": "Bill includes root canal treatment (covered) and teeth whitening (cosmetic, excluded). System must approve only the covered procedure.",
+      "expected": "PARTIAL",
+      "final": {
+        "claim_id": "TC006",
+        "status": "REJECTED",
+        "reason": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC006",
+          "category": "DENTAL",
+          "documents": [
+            {
+              "file_id": "F011",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": "Smile Dental Clinic",
+                "gstin": null,
+                "bill_number": null,
+                "date": null,
+                "patient_name": "Priya Singh",
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [
+                  {
+                    "description": "Root Canal Treatment",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 8000.0
+                  },
+                  {
+                    "description": "Teeth Whitening",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 4000.0
+                  }
+                ],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 12000.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC006",
+          "status": "REJECTED",
+          "reason": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category DENTAL covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 12000 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 12000
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": false,
+              "severity": "error",
+              "message": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 12000
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-10-15",
+                "submission_date": "2024-10-15",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 12000,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": false,
+              "severity": "error",
+              "message": "1 excluded item(s) found",
+              "evidence": {
+                "hits": [
+                  {
+                    "item": "Teeth Whitening",
+                    "matched": "teeth whitening"
+                  }
+                ]
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "Out-of-network: Smile Dental Clinic",
+              "evidence": {
+                "in_network": false
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 12000.0,
+            "after_network_discount": 12000.0,
+            "after_sub_limit": 10000.0,
+            "copay_amount": 0.0,
+            "payable": 10000.0,
+            "notes": [
+              "Capped at category sub-limit \u20b910000"
+            ]
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 12000,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "b81967b2b3c1",
+          "claim_id": "TC006",
+          "started_at": "2026-04-23T20:47:21.349199+00:00",
+          "ended_at": "2026-04-23T20:47:21.350688+00:00",
+          "duration_ms": 1.49,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.349411+00:00",
+              "ended_at": "2026-04-23T20:47:21.349431+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.349428+00:00",
+                  "attrs": {
+                    "file_id": "F011",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 1,
+                "parsed": 1,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.349553+00:00",
+              "ended_at": "2026-04-23T20:47:21.349628+00:00",
+              "duration_ms": 0.07,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.349743+00:00",
+              "ended_at": "2026-04-23T20:47:21.350346+00:00",
+              "duration_ms": 0.6,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350323+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category DENTAL covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350326+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 12000 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350328+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "Claim \u20b912000 exceeds per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350330+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350332+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350333+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350335+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "1 excluded item(s) found"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.350336+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Out-of-network: Smile Dental Clinic"
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.350339+00:00",
+                  "attrs": {
+                    "claimed": 12000.0,
+                    "after_network_discount": 12000.0,
+                    "after_sub_limit": 10000.0,
+                    "copay": 0.0,
+                    "payable": 10000.0,
+                    "is_network": false
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "REJECTED",
+                "payable": 10000.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.350440+00:00",
+              "ended_at": "2026-04-23T20:47:21.350528+00:00",
+              "duration_ms": 0.09,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.350521+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.350523+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.350525+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.350526+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.350618+00:00",
+              "ended_at": "2026-04-23T20:47:21.350629+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC007",
+      "description": "MRI scan costing \u20b915,000 submitted without pre-authorization. Policy requires pre-auth for MRI above \u20b910,000.",
+      "expected": "REJECTED",
+      "final": {
+        "claim_id": "TC007",
+        "status": "REJECTED",
+        "reason": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC007",
+          "category": "DIAGNOSTIC",
+          "documents": [
+            {
+              "file_id": "F012",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Dr. Venkat Rao",
+                "doctor_registration": "AP/67890/2017",
+                "doctor_specialization": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "date": null,
+                "diagnosis": "Suspected Lumbar Disc Herniation",
+                "medicines": [],
+                "tests_ordered": [
+                  "MRI Lumbar Spine"
+                ],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F013",
+              "doc_type": "LAB_REPORT",
+              "extracted": {
+                "lab_name": null,
+                "nabl_id": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "referring_doctor": null,
+                "sample_date": null,
+                "report_date": null,
+                "tests": [],
+                "pathologist_name": null,
+                "remarks": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F014",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": null,
+                "gstin": null,
+                "bill_number": null,
+                "date": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [
+                  {
+                    "description": "MRI Lumbar Spine",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 15000.0
+                  }
+                ],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 15000.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC007",
+          "status": "REJECTED",
+          "reason": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category DIAGNOSTIC covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 15000 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 15000
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": false,
+              "severity": "error",
+              "message": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 15000
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-11-02",
+                "submission_date": "2024-11-02",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": false,
+              "severity": "error",
+              "message": "Pre-auth required: True (provided: False) \u2014  | Suspected Lumbar Disc Herniation | MRI Lumbar Spine | MRI Lumbar Spine above \u20b910000",
+              "evidence": {
+                "threshold": 10000,
+                "high_value_list": [
+                  "mri",
+                  "ct scan",
+                  "pet scan"
+                ],
+                "claimed": 15000,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": true,
+              "severity": "info",
+              "message": "No excluded items",
+              "evidence": {
+                "hits": []
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "In-network: ",
+              "evidence": {
+                "in_network": true
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 15000.0,
+            "after_network_discount": 13500.0,
+            "after_sub_limit": 10000.0,
+            "copay_amount": 0.0,
+            "payable": 10000.0,
+            "notes": [
+              "Applied 10% network discount",
+              "Capped at category sub-limit \u20b910000"
+            ]
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 15000,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "8ff0743207a1",
+          "claim_id": "TC007",
+          "started_at": "2026-04-23T20:47:21.350737+00:00",
+          "ended_at": "2026-04-23T20:47:21.352061+00:00",
+          "duration_ms": 1.32,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.350906+00:00",
+              "ended_at": "2026-04-23T20:47:21.350933+00:00",
+              "duration_ms": 0.03,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.350917+00:00",
+                  "attrs": {
+                    "file_id": "F012",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.350925+00:00",
+                  "attrs": {
+                    "file_id": "F013",
+                    "doc_type": "LAB_REPORT",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.350931+00:00",
+                  "attrs": {
+                    "file_id": "F014",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 3,
+                "parsed": 3,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.351034+00:00",
+              "ended_at": "2026-04-23T20:47:21.351097+00:00",
+              "duration_ms": 0.06,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.351197+00:00",
+              "ended_at": "2026-04-23T20:47:21.351766+00:00",
+              "duration_ms": 0.57,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351746+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category DIAGNOSTIC covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351749+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 15000 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351751+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "Claim \u20b915000 exceeds per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351752+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351754+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351755+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "Pre-auth required: True (provided: False) \u2014  | Suspected Lumbar Disc Herniation | MRI Lumbar Spine | MRI Lumbar Spine above \u20b910000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351757+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "No excluded items"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.351758+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "In-network: "
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.351760+00:00",
+                  "attrs": {
+                    "claimed": 15000.0,
+                    "after_network_discount": 13500.0,
+                    "after_sub_limit": 10000.0,
+                    "copay": 0.0,
+                    "payable": 10000.0,
+                    "is_network": true
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "REJECTED",
+                "payable": 10000.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.351848+00:00",
+              "ended_at": "2026-04-23T20:47:21.351925+00:00",
+              "duration_ms": 0.08,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.351919+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.351921+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.351922+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.351924+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.352001+00:00",
+              "ended_at": "2026-04-23T20:47:21.352009+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC008",
+      "description": "Claimed amount of \u20b97,500 exceeds the per-claim limit of \u20b95,000.",
+      "expected": "REJECTED",
+      "final": {
+        "claim_id": "TC008",
+        "status": "REJECTED",
+        "reason": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC008",
+          "category": "CONSULTATION",
+          "documents": [
+            {
+              "file_id": "F015",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Dr. R. Gupta",
+                "doctor_registration": "DL/34567/2016",
+                "doctor_specialization": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "date": null,
+                "diagnosis": "Gastroenteritis",
+                "medicines": [
+                  {
+                    "name": "Antibiotics",
+                    "dosage": null,
+                    "duration": null
+                  },
+                  {
+                    "name": "Probiotics",
+                    "dosage": null,
+                    "duration": null
+                  },
+                  {
+                    "name": "ORS",
+                    "dosage": null,
+                    "duration": null
+                  }
+                ],
+                "tests_ordered": [],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F016",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": null,
+                "gstin": null,
+                "bill_number": null,
+                "date": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [
+                  {
+                    "description": "Consultation Fee",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 2000.0
+                  },
+                  {
+                    "description": "Medicines",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 5500.0
+                  }
+                ],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 7500.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC008",
+          "status": "REJECTED",
+          "reason": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category CONSULTATION covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 7500 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 7500
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": false,
+              "severity": "error",
+              "message": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 7500
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-10-20",
+                "submission_date": "2024-10-20",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 7500,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": true,
+              "severity": "info",
+              "message": "No excluded items",
+              "evidence": {
+                "hits": []
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "In-network: ",
+              "evidence": {
+                "in_network": true
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 7500.0,
+            "after_network_discount": 6000.0,
+            "after_sub_limit": 2000.0,
+            "copay_amount": 200.0,
+            "payable": 1800.0,
+            "notes": [
+              "Applied 20% network discount",
+              "Capped at category sub-limit \u20b92000",
+              "Applied 10% copay (\u20b9200.0)"
+            ]
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 7500,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "199a1082895f",
+          "claim_id": "TC008",
+          "started_at": "2026-04-23T20:47:21.352113+00:00",
+          "ended_at": "2026-04-23T20:47:21.353380+00:00",
+          "duration_ms": 1.27,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.352270+00:00",
+              "ended_at": "2026-04-23T20:47:21.352291+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.352282+00:00",
+                  "attrs": {
+                    "file_id": "F015",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.352289+00:00",
+                  "attrs": {
+                    "file_id": "F016",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 2,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.352389+00:00",
+              "ended_at": "2026-04-23T20:47:21.352450+00:00",
+              "duration_ms": 0.06,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.352549+00:00",
+              "ended_at": "2026-04-23T20:47:21.353069+00:00",
+              "duration_ms": 0.52,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353051+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category CONSULTATION covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353053+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 7500 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353055+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "Claim \u20b97500 exceeds per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353056+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353058+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353059+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353061+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "No excluded items"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.353062+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "In-network: "
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.353064+00:00",
+                  "attrs": {
+                    "claimed": 7500.0,
+                    "after_network_discount": 6000.0,
+                    "after_sub_limit": 2000.0,
+                    "copay": 200.0,
+                    "payable": 1800.0,
+                    "is_network": true
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "REJECTED",
+                "payable": 1800.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.353149+00:00",
+              "ended_at": "2026-04-23T20:47:21.353226+00:00",
+              "duration_ms": 0.08,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.353218+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.353221+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.353222+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.353224+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.353313+00:00",
+              "ended_at": "2026-04-23T20:47:21.353322+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC009",
+      "description": "Member EMP008 has already submitted 3 claims today before this one arrives. This is the 4th claim from the same member on the same day.",
+      "expected": "MANUAL_REVIEW",
+      "final": {
+        "claim_id": "TC009",
+        "status": "MANUAL_REVIEW",
+        "reason": "Flagged for manual review: 4 claims on 2024-10-30 (limit 2)",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC009",
+          "category": "CONSULTATION",
+          "documents": [
+            {
+              "file_id": "F017",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Dr. S. Khan",
+                "doctor_registration": null,
+                "doctor_specialization": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "date": null,
+                "diagnosis": "Migraine",
+                "medicines": [],
+                "tests_ordered": [],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F018",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": null,
+                "gstin": null,
+                "bill_number": null,
+                "date": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 4800.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC009",
+          "status": "MANUAL_REVIEW",
+          "reason": "Flagged for manual review: 4 claims on 2024-10-30 (limit 2)",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category CONSULTATION covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 4800 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 4800
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim \u20b94800 within per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 4800
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-10-30",
+                "submission_date": "2024-10-30",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 4800,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": true,
+              "severity": "info",
+              "message": "No excluded items",
+              "evidence": {
+                "hits": []
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "In-network: ",
+              "evidence": {
+                "in_network": true
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 4800.0,
+            "after_network_discount": 3840.0,
+            "after_sub_limit": 2000.0,
+            "copay_amount": 200.0,
+            "payable": 1800.0,
+            "notes": [
+              "Applied 20% network discount",
+              "Capped at category sub-limit \u20b92000",
+              "Applied 10% copay (\u20b9200.0)"
+            ]
+          },
+          "fraud": {
+            "score": 0.6,
+            "needs_manual_review": true,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "error",
+                "weight": 0.6,
+                "message": "4 claims on 2024-10-30 (limit 2)",
+                "evidence": {
+                  "count": 4,
+                  "limit": 2,
+                  "same_day": [
+                    {
+                      "claim_id": "CLM_0081",
+                      "date": "2024-10-30",
+                      "amount": 1200,
+                      "provider": "City Clinic A"
+                    },
+                    {
+                      "claim_id": "CLM_0082",
+                      "date": "2024-10-30",
+                      "amount": 1800,
+                      "provider": "City Clinic B"
+                    },
+                    {
+                      "claim_id": "CLM_0083",
+                      "date": "2024-10-30",
+                      "amount": 2100,
+                      "provider": "Wellness Center"
+                    }
+                  ]
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (4/6)",
+                "evidence": {
+                  "count": 4,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 4800,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "f4228da266b0",
+          "claim_id": "TC009",
+          "started_at": "2026-04-23T20:47:21.353435+00:00",
+          "ended_at": "2026-04-23T20:47:21.354810+00:00",
+          "duration_ms": 1.37,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.353611+00:00",
+              "ended_at": "2026-04-23T20:47:21.353629+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.353621+00:00",
+                  "attrs": {
+                    "file_id": "F017",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.353627+00:00",
+                  "attrs": {
+                    "file_id": "F018",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 2,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.353742+00:00",
+              "ended_at": "2026-04-23T20:47:21.353811+00:00",
+              "duration_ms": 0.07,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.353924+00:00",
+              "ended_at": "2026-04-23T20:47:21.354476+00:00",
+              "duration_ms": 0.55,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354457+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category CONSULTATION covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354459+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 4800 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354461+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim \u20b94800 within per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354462+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354464+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354465+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354467+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "No excluded items"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.354468+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "In-network: "
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.354470+00:00",
+                  "attrs": {
+                    "claimed": 4800.0,
+                    "after_network_discount": 3840.0,
+                    "after_sub_limit": 2000.0,
+                    "copay": 200.0,
+                    "payable": 1800.0,
+                    "is_network": true
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "APPROVED",
+                "payable": 1800.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.354558+00:00",
+              "ended_at": "2026-04-23T20:47:21.354657+00:00",
+              "duration_ms": 0.1,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.354650+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "error",
+                    "weight": 0.6,
+                    "message": "4 claims on 2024-10-30 (limit 2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.354652+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (4/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.354653+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.354655+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.6,
+                "needs_manual_review": true
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.354732+00:00",
+              "ended_at": "2026-04-23T20:47:21.354747+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "MANUAL_REVIEW",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC010",
+      "description": "Valid claim at Apollo Hospitals, a network hospital. Network discount must be applied before co-pay.",
+      "expected": "APPROVED",
+      "final": {
+        "claim_id": "TC010",
+        "status": "APPROVED",
+        "reason": "All rules passed. Payable \u20b91800.0.",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC010",
+          "category": "CONSULTATION",
+          "documents": [
+            {
+              "file_id": "F019",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Dr. S. Iyer",
+                "doctor_registration": "TN/56789/2013",
+                "doctor_specialization": null,
+                "patient_name": "Deepak Shah",
+                "patient_age": null,
+                "patient_gender": null,
+                "date": null,
+                "diagnosis": "Acute Bronchitis",
+                "medicines": [
+                  {
+                    "name": "Amoxicillin 500mg",
+                    "dosage": null,
+                    "duration": null
+                  },
+                  {
+                    "name": "Salbutamol Inhaler",
+                    "dosage": null,
+                    "duration": null
+                  }
+                ],
+                "tests_ordered": [],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F020",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": "Apollo Hospitals",
+                "gstin": null,
+                "bill_number": null,
+                "date": null,
+                "patient_name": "Deepak Shah",
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [
+                  {
+                    "description": "Consultation Fee",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 1500.0
+                  },
+                  {
+                    "description": "Medicines",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 3000.0
+                  }
+                ],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 4500.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC010",
+          "status": "APPROVED",
+          "reason": "All rules passed. Payable \u20b91800.0.",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category CONSULTATION covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 4500 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 4500
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim \u20b94500 within per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 4500
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-11-03",
+                "submission_date": "2024-11-03",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 4500,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": true,
+              "severity": "info",
+              "message": "No excluded items",
+              "evidence": {
+                "hits": []
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "In-network: Apollo Hospitals",
+              "evidence": {
+                "in_network": true
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 4500.0,
+            "after_network_discount": 3600.0,
+            "after_sub_limit": 2000.0,
+            "copay_amount": 200.0,
+            "payable": 1800.0,
+            "notes": [
+              "Applied 20% network discount",
+              "Capped at category sub-limit \u20b92000",
+              "Applied 10% copay (\u20b9200.0)"
+            ]
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 4500,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "2b2da23be675",
+          "claim_id": "TC010",
+          "started_at": "2026-04-23T20:47:21.354856+00:00",
+          "ended_at": "2026-04-23T20:47:21.356079+00:00",
+          "duration_ms": 1.22,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.355010+00:00",
+              "ended_at": "2026-04-23T20:47:21.355030+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.355021+00:00",
+                  "attrs": {
+                    "file_id": "F019",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.355028+00:00",
+                  "attrs": {
+                    "file_id": "F020",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 2,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.355127+00:00",
+              "ended_at": "2026-04-23T20:47:21.355187+00:00",
+              "duration_ms": 0.06,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.355283+00:00",
+              "ended_at": "2026-04-23T20:47:21.355790+00:00",
+              "duration_ms": 0.51,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355773+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category CONSULTATION covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355775+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 4500 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355777+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim \u20b94500 within per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355778+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355780+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355781+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355783+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "No excluded items"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.355784+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "In-network: Apollo Hospitals"
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.355786+00:00",
+                  "attrs": {
+                    "claimed": 4500.0,
+                    "after_network_discount": 3600.0,
+                    "after_sub_limit": 2000.0,
+                    "copay": 200.0,
+                    "payable": 1800.0,
+                    "is_network": true
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "APPROVED",
+                "payable": 1800.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.355870+00:00",
+              "ended_at": "2026-04-23T20:47:21.355945+00:00",
+              "duration_ms": 0.07,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.355938+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.355940+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.355942+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.355943+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.356020+00:00",
+              "ended_at": "2026-04-23T20:47:21.356029+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "APPROVED",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC011",
+      "description": "One component of your system fails mid-processing (simulate with the flag below). The overall pipeline must continue, produce a decision, and make the failure visible in the output with an appropriately reduced confidence score.",
+      "expected": "APPROVED",
+      "final": {
+        "claim_id": "TC011",
+        "status": "APPROVED",
+        "reason": "All rules passed. Payable \u20b94000.0.",
+        "confidence": 0.7,
+        "claim": {
+          "claim_id": "TC011",
+          "category": "ALTERNATIVE_MEDICINE",
+          "documents": [
+            {
+              "file_id": "F021",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Vaidya T. Krishnan",
+                "doctor_registration": "AYUR/KL/2345/2019",
+                "doctor_specialization": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "date": null,
+                "diagnosis": "Chronic Joint Pain",
+                "medicines": [],
+                "tests_ordered": [],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F022",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": "Ayur Wellness Centre",
+                "gstin": null,
+                "bill_number": null,
+                "date": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [
+                  {
+                    "description": "Panchakarma Therapy (5 sessions)",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 3000.0
+                  },
+                  {
+                    "description": "Consultation",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 1000.0
+                  }
+                ],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 4000.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC011",
+          "status": "APPROVED",
+          "reason": "All rules passed. Payable \u20b94000.0.",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category ALTERNATIVE_MEDICINE covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 4000 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 4000
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim \u20b94000 within per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 4000
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-10-28",
+                "submission_date": "2024-10-28",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 4000,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": true,
+              "severity": "info",
+              "message": "No excluded items",
+              "evidence": {
+                "hits": []
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "Out-of-network: Ayur Wellness Centre",
+              "evidence": {
+                "in_network": false
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 4000.0,
+            "after_network_discount": 4000.0,
+            "after_sub_limit": 4000.0,
+            "copay_amount": 0.0,
+            "payable": 4000.0,
+            "notes": []
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 4000,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [
+          {
+            "stage": "simulated",
+            "file_id": null,
+            "error_type": "SimulatedFailure",
+            "message": "component failure simulated"
+          }
+        ],
+        "notes": [
+          "Component failure simulated; manual review recommended"
+        ],
+        "trace": {
+          "trace_id": "8764eb209a45",
+          "claim_id": "TC011",
+          "started_at": "2026-04-23T20:47:21.356124+00:00",
+          "ended_at": "2026-04-23T20:47:21.357416+00:00",
+          "duration_ms": 1.29,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.356278+00:00",
+              "ended_at": "2026-04-23T20:47:21.356296+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.356287+00:00",
+                  "attrs": {
+                    "file_id": "F021",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.356294+00:00",
+                  "attrs": {
+                    "file_id": "F022",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 2,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.356393+00:00",
+              "ended_at": "2026-04-23T20:47:21.356451+00:00",
+              "duration_ms": 0.06,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.356549+00:00",
+              "ended_at": "2026-04-23T20:47:21.357091+00:00",
+              "duration_ms": 0.54,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357071+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category ALTERNATIVE_MEDICINE covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357074+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 4000 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357076+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim \u20b94000 within per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357077+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357079+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357081+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357082+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "No excluded items"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.357084+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Out-of-network: Ayur Wellness Centre"
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.357086+00:00",
+                  "attrs": {
+                    "claimed": 4000.0,
+                    "after_network_discount": 4000.0,
+                    "after_sub_limit": 4000.0,
+                    "copay": 0.0,
+                    "payable": 4000.0,
+                    "is_network": false
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "APPROVED",
+                "payable": 4000.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.357179+00:00",
+              "ended_at": "2026-04-23T20:47:21.357256+00:00",
+              "duration_ms": 0.08,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.357250+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.357252+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.357253+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.357255+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.357346+00:00",
+              "ended_at": "2026-04-23T20:47:21.357360+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "APPROVED",
+                "confidence": 0.7,
+                "stage_errors": 1
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case_id": "TC012",
+      "description": "Member claims for bariatric consultation and a diet program. Obesity treatment is explicitly excluded under the policy.",
+      "expected": "REJECTED",
+      "final": {
+        "claim_id": "TC012",
+        "status": "REJECTED",
+        "reason": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+        "confidence": 1.0,
+        "claim": {
+          "claim_id": "TC012",
+          "category": "CONSULTATION",
+          "documents": [
+            {
+              "file_id": "F023",
+              "doc_type": "PRESCRIPTION",
+              "extracted": {
+                "doctor_name": "Dr. P. Banerjee",
+                "doctor_registration": "WB/34567/2015",
+                "doctor_specialization": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "date": null,
+                "diagnosis": "Morbid Obesity \u2014 BMI 37",
+                "medicines": [],
+                "tests_ordered": [],
+                "clinic_name": null
+              },
+              "confidence": 1.0
+            },
+            {
+              "file_id": "F024",
+              "doc_type": "HOSPITAL_BILL",
+              "extracted": {
+                "hospital_name": null,
+                "gstin": null,
+                "bill_number": null,
+                "date": null,
+                "patient_name": null,
+                "patient_age": null,
+                "patient_gender": null,
+                "line_items": [
+                  {
+                    "description": "Bariatric Consultation",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 3000.0
+                  },
+                  {
+                    "description": "Personalised Diet and Nutrition Program",
+                    "quantity": null,
+                    "rate": null,
+                    "amount": 5000.0
+                  }
+                ],
+                "subtotal": null,
+                "gst_amount": null,
+                "total": 8000.0
+              },
+              "confidence": 1.0
+            }
+          ],
+          "issues": [],
+          "missing_documents": []
+        },
+        "decision": {
+          "claim_id": "TC012",
+          "status": "REJECTED",
+          "reason": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+          "rules": [
+            {
+              "code": "CATEGORY_COVERED",
+              "passed": true,
+              "severity": "info",
+              "message": "Category CONSULTATION covered=True",
+              "evidence": {}
+            },
+            {
+              "code": "MINIMUM_AMOUNT",
+              "passed": true,
+              "severity": "info",
+              "message": "Claim 8000 vs minimum 500",
+              "evidence": {
+                "minimum": 500,
+                "claimed": 8000
+              }
+            },
+            {
+              "code": "PER_CLAIM_LIMIT",
+              "passed": false,
+              "severity": "error",
+              "message": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+              "evidence": {
+                "limit": 5000,
+                "claimed": 8000
+              }
+            },
+            {
+              "code": "SUBMISSION_DEADLINE",
+              "passed": true,
+              "severity": "info",
+              "message": "Submitted 0 days after treatment (limit 30)",
+              "evidence": {
+                "treatment_date": "2024-10-18",
+                "submission_date": "2024-10-18",
+                "limit_days": 30
+              }
+            },
+            {
+              "code": "WAITING_PERIOD",
+              "passed": true,
+              "severity": "info",
+              "message": "Waiting period satisfied",
+              "evidence": {}
+            },
+            {
+              "code": "PRE_AUTH",
+              "passed": true,
+              "severity": "info",
+              "message": "Pre-auth required: False (provided: False)",
+              "evidence": {
+                "threshold": null,
+                "high_value_list": [],
+                "claimed": 8000,
+                "pre_auth_provided": false
+              }
+            },
+            {
+              "code": "EXCLUSIONS",
+              "passed": false,
+              "severity": "error",
+              "message": "2 excluded item(s) found",
+              "evidence": {
+                "hits": [
+                  {
+                    "item": "Bariatric Consultation",
+                    "matched": "Bariatric surgery"
+                  },
+                  {
+                    "diagnosis": "Morbid Obesity \u2014 BMI 37",
+                    "matched": "Obesity and weight loss programs"
+                  }
+                ]
+              }
+            },
+            {
+              "code": "NETWORK_HOSPITAL",
+              "passed": true,
+              "severity": "info",
+              "message": "In-network: ",
+              "evidence": {
+                "in_network": true
+              }
+            }
+          ],
+          "payable": {
+            "claimed_amount": 8000.0,
+            "after_network_discount": 6400.0,
+            "after_sub_limit": 2000.0,
+            "copay_amount": 200.0,
+            "payable": 1800.0,
+            "notes": [
+              "Applied 20% network discount",
+              "Capped at category sub-limit \u20b92000",
+              "Applied 10% copay (\u20b9200.0)"
+            ]
+          },
+          "fraud": {
+            "score": 0.0,
+            "needs_manual_review": false,
+            "signals": [
+              {
+                "code": "SAME_DAY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Same-day claim count ok (1/2)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 2,
+                  "same_day": []
+                }
+              },
+              {
+                "code": "MONTHLY_CLAIMS",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Monthly claim count ok (1/6)",
+                "evidence": {
+                  "count": 1,
+                  "limit": 6
+                }
+              },
+              {
+                "code": "HIGH_VALUE_AUTO_REVIEW",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "Claim within normal value range",
+                "evidence": {
+                  "claimed": 8000,
+                  "threshold": 25000
+                }
+              },
+              {
+                "code": "DUPLICATE_CLAIM",
+                "severity": "info",
+                "weight": 0.0,
+                "message": "No duplicates",
+                "evidence": {
+                  "matches": []
+                }
+              }
+            ]
+          }
+        },
+        "stage_errors": [],
+        "notes": [],
+        "trace": {
+          "trace_id": "9d880ad8bc56",
+          "claim_id": "TC012",
+          "started_at": "2026-04-23T20:47:21.357466+00:00",
+          "ended_at": "2026-04-23T20:47:21.358841+00:00",
+          "duration_ms": 1.37,
+          "spans": [
+            {
+              "stage": "parse",
+              "started_at": "2026-04-23T20:47:21.357641+00:00",
+              "ended_at": "2026-04-23T20:47:21.357660+00:00",
+              "duration_ms": 0.02,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.357651+00:00",
+                  "attrs": {
+                    "file_id": "F023",
+                    "doc_type": "PRESCRIPTION",
+                    "source": "dict"
+                  }
+                },
+                {
+                  "name": "doc_parsed",
+                  "at": "2026-04-23T20:47:21.357658+00:00",
+                  "attrs": {
+                    "file_id": "F024",
+                    "doc_type": "HOSPITAL_BILL",
+                    "source": "dict"
+                  }
+                }
+              ],
+              "attrs": {
+                "doc_count": 2,
+                "parsed": 2,
+                "errors": 0
+              }
+            },
+            {
+              "stage": "assemble",
+              "started_at": "2026-04-23T20:47:21.357768+00:00",
+              "ended_at": "2026-04-23T20:47:21.357833+00:00",
+              "duration_ms": 0.06,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "issue_count": 0,
+                "missing_docs": 0,
+                "has_errors": false
+              }
+            },
+            {
+              "stage": "rules",
+              "started_at": "2026-04-23T20:47:21.357942+00:00",
+              "ended_at": "2026-04-23T20:47:21.358519+00:00",
+              "duration_ms": 0.58,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358499+00:00",
+                  "attrs": {
+                    "code": "CATEGORY_COVERED",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Category CONSULTATION covered=True"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358502+00:00",
+                  "attrs": {
+                    "code": "MINIMUM_AMOUNT",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Claim 8000 vs minimum 500"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358503+00:00",
+                  "attrs": {
+                    "code": "PER_CLAIM_LIMIT",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "Claim \u20b98000 exceeds per-claim limit \u20b95000"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358505+00:00",
+                  "attrs": {
+                    "code": "SUBMISSION_DEADLINE",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Submitted 0 days after treatment (limit 30)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358507+00:00",
+                  "attrs": {
+                    "code": "WAITING_PERIOD",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Waiting period satisfied"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358508+00:00",
+                  "attrs": {
+                    "code": "PRE_AUTH",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Pre-auth required: False (provided: False)"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358510+00:00",
+                  "attrs": {
+                    "code": "EXCLUSIONS",
+                    "passed": false,
+                    "severity": "error",
+                    "message": "2 excluded item(s) found"
+                  }
+                },
+                {
+                  "name": "rule_eval",
+                  "at": "2026-04-23T20:47:21.358511+00:00",
+                  "attrs": {
+                    "code": "NETWORK_HOSPITAL",
+                    "passed": true,
+                    "severity": "info",
+                    "message": "In-network: "
+                  }
+                },
+                {
+                  "name": "payable_computed",
+                  "at": "2026-04-23T20:47:21.358513+00:00",
+                  "attrs": {
+                    "claimed": 8000.0,
+                    "after_network_discount": 6400.0,
+                    "after_sub_limit": 2000.0,
+                    "copay": 200.0,
+                    "payable": 1800.0,
+                    "is_network": true
+                  }
+                }
+              ],
+              "attrs": {
+                "status": "REJECTED",
+                "payable": 1800.0
+              }
+            },
+            {
+              "stage": "fraud",
+              "started_at": "2026-04-23T20:47:21.358608+00:00",
+              "ended_at": "2026-04-23T20:47:21.358693+00:00",
+              "duration_ms": 0.08,
+              "status": "ok",
+              "error": null,
+              "events": [
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.358685+00:00",
+                  "attrs": {
+                    "code": "SAME_DAY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Same-day claim count ok (1/2)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.358687+00:00",
+                  "attrs": {
+                    "code": "MONTHLY_CLAIMS",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Monthly claim count ok (1/6)"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.358689+00:00",
+                  "attrs": {
+                    "code": "HIGH_VALUE_AUTO_REVIEW",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "Claim within normal value range"
+                  }
+                },
+                {
+                  "name": "fraud_signal",
+                  "at": "2026-04-23T20:47:21.358691+00:00",
+                  "attrs": {
+                    "code": "DUPLICATE_CLAIM",
+                    "severity": "info",
+                    "weight": 0.0,
+                    "message": "No duplicates"
+                  }
+                }
+              ],
+              "attrs": {
+                "score": 0.0,
+                "needs_manual_review": false
+              }
+            },
+            {
+              "stage": "finalize",
+              "started_at": "2026-04-23T20:47:21.358777+00:00",
+              "ended_at": "2026-04-23T20:47:21.358786+00:00",
+              "duration_ms": 0.01,
+              "status": "ok",
+              "error": null,
+              "events": [],
+              "attrs": {
+                "status": "REJECTED",
+                "confidence": 1.0,
+                "stage_errors": 0
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
