@@ -1,103 +1,78 @@
 # Plum AI — Health Insurance Claims Processing
 
-Automated claims processing system for the Plum AI Engineer assignment. Processes health insurance claims end-to-end: document verification, field extraction, policy evaluation, and explainable decisions.
+End-to-end claims processing system for the Plum AI Engineer assignment. Given a claim submission and uploaded documents, produces an explainable decision (`APPROVED`, `PARTIAL`, `REJECTED`, `MANUAL_REVIEW`, or `NEEDS_REUPLOAD`) with the approved amount, reason, confidence, and a full per-stage trace.
 
-See [`PROBLEM_STATEMENT/assignment.md`](PROBLEM_STATEMENT/assignment.md) for the full brief.
+See [`PROBLEM_STATEMENT/assignment.md`](PROBLEM_STATEMENT/assignment.md) for the brief.
 
----
+## Docs
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the system is built, design decisions, scaling notes
+- [`docs/CONTRACTS.md`](docs/CONTRACTS.md) — per-component interfaces, inputs, outputs, errors
+- [`docs/EVAL_REPORT.md`](docs/EVAL_REPORT.md) — results across all 12 official test cases (11/12 match)
+
+## Pipeline
+
+```
+parse → assemble → rules → fraud → finalize
+  │         │
+  └─ NEEDS_REUPLOAD   └─ REJECTED (consistency errors)
+```
+
+Five LangGraph nodes with two conditional short-circuits. A thread-local `Tracer` records a span per stage and events for every LLM call, rule evaluation, fraud signal, and payable computation — attached to `FinalDecision.trace`.
 
 ## Setup
 
-### 1. Python environment
-
-Requires **Python 3.10+**.
-
 ```bash
 python -m venv .venv
-source .venv/bin/activate       # macOS / Linux
+source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # add an LLM key (Anthropic/OpenAI/Groq — any one)
 ```
 
-### 2. API keys
-
-Copy `.env.example` to `.env` and fill in at least one LLM provider key:
+## Run
 
 ```bash
-cp .env.example .env
-# edit .env and add your ANTHROPIC_API_KEY (recommended)
-```
+# All 12 official test cases, writes evals/report.{json,md}
+python scripts/run_evals.py
 
-Supported providers: **Anthropic** (default for vision), **OpenAI**, **Groq** (text-only). You only need one configured to run.
+# Single case
+python scripts/run_evals.py --case TC010
 
-### 3. Run tests
+# Render graph
+python scripts/run_graph.py --mermaid
 
-```bash
-pytest
-```
-
-All LLM calls in tests are mocked, so no API key is needed for `pytest`.
-
----
-
-## CLI — parse a single document
-
-Generate small sample PDFs (one-time):
-
-```bash
-python tests/fixtures/make_fixtures.py
-```
-
-Parse end-to-end and print the `ParsedDocument` JSON:
-
-```bash
+# Parse a single document end-to-end
 python scripts/parse_one.py tests/fixtures/sample_docs/prescription.pdf --pretty
-python scripts/parse_one.py tests/fixtures/sample_docs/hospital_bill.pdf --expected HOSPITAL_BILL --pretty
 ```
 
-Flags:
-- `--expected <DOC_TYPE>` — enforces the expected document type (raises `WrongDocumentTypeError` on mismatch, matching test case TC001).
-- `--file-id <id>` — synthetic identifier for the output payload.
-- `--pretty` — pretty-print JSON.
+## Tests
 
-Supported inputs: `.pdf, .jpg, .jpeg, .png, .webp, .gif`.
+```bash
+pytest            # 55 tests, LLM calls mocked
+```
 
----
-
-## Project Structure
+## Layout
 
 ```
 src/claims_processor/
-  clients/             # LLM adapter functions (OpenAI / Anthropic / Groq)
-  core/                # Config + policy_terms loader
-  models/              # Pydantic schemas (documents, claims)
-  prompts/             # Prompt templates per task
-  document_extractor/  # Layer 1 — document parsing & extraction
-scripts/               # CLI entry points
-tests/                 # Unit tests + programmatic fixtures
-  fixtures/
-    make_fixtures.py   # generates sample PDFs
-    sample_docs/       # generated artefacts (git-ignored content)
+  clients/              # LLM adapters (OpenAI / Anthropic / Groq), traced
+  core/                 # config + policy_terms loader
+  models/               # Pydantic schemas (documents, claim, decision, fraud, final, trace)
+  prompts/              # prompt templates
+  document_extractor/   # layer 1 — parse / classify / extract
+  claim_assembler/      # layer 2 — cross-document consistency
+  rules_engine/         # layer 3 — policy rules + financials
+  fraud_detector/       # layer 4 — anomaly signals
+  observability/        # Tracer, Trace, TraceSpan, TraceEvent
+  orchestrator/
+    graph.py            # LangGraph wiring (5 nodes, 2 routers)
+    pipeline.py         # function-based equivalent
+scripts/
+  run_evals.py          # all 12 cases → evals/report.{json,md}
+  run_graph.py          # CLI for the LangGraph pipeline
+  parse_one.py          # single-doc parser CLI
+tests/                  # 55 tests
+docs/                   # ARCHITECTURE, CONTRACTS, EVAL_REPORT
+evals/                  # generated eval output
+PROBLEM_STATEMENT/      # assignment brief + policy + test cases
 ```
-
----
-
-## Layer 1 — Document Extractor (done)
-
-Entry point: `claims_processor.document_extractor.parse.parse_document`.
-
-Flow:
-1. Validate extension → `UnsupportedFileTypeError`
-2. Text-native PDFs use pypdfium2 text; scanned PDFs and images go through a vision LLM
-3. Classify into one of 7 medical doc types (the Pydantic `ClassifierResponse` schema is passed to the LLM as `response_format`)
-4. Enforce expected type (TC001 → `WrongDocumentTypeError`)
-5. Enforce readability (TC002 → `UnreadableDocumentError`)
-6. Extract typed fields by passing the per-doc-type Pydantic schema to the LLM adapter
-
-Supported doc types: `PRESCRIPTION, HOSPITAL_BILL, PHARMACY_BILL, LAB_REPORT, DIAGNOSTIC_REPORT, DENTAL_REPORT, DISCHARGE_SUMMARY`.
-
----
-
-## Status
-
-- **Layer 1 — Document Extractor** — done on branch `feat/document-extractor`.
-- **Layer 2+** (cross-document consistency, rules engine, decision agent, workflow orchestration, API/UI) — pending on subsequent feature branches.
