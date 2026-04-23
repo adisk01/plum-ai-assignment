@@ -9,6 +9,9 @@ pydantic>=2.0
 # Environment
 python-dotenv>=1.0.0
 
+# Graph orchestration
+langgraph>=0.2.0
+
 # PDF parsing
 pypdfium2>=4.0.0
 
