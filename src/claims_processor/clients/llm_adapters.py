@@ -13,10 +13,12 @@ Env vars:
 import base64
 import json
 import os
+import time
 
 from pydantic import BaseModel
 
 from claims_processor.core import config
+from claims_processor.observability import get_tracer
 
 
 MEDIA_TYPES = {
@@ -44,6 +46,32 @@ def _schema_dict(schema):
     raise ValueError("schema must be a Pydantic model class or dict")
 
 
+def _traced(provider, model, kind, fn):
+    """Wrap an LLM call; emit a trace event with timing + token usage + errors."""
+    tracer = get_tracer()
+    t0 = time.perf_counter()
+    usage = {}
+    error = None
+    try:
+        resp, usage = fn()
+        return resp
+    except Exception as e:
+        error = f"{type(e).__name__}: {e}"
+        raise
+    finally:
+        if tracer is not None:
+            tracer.event(
+                "llm_call",
+                provider=provider,
+                model=model,
+                kind=kind,
+                latency_ms=round((time.perf_counter() - t0) * 1000.0, 2),
+                ok=error is None,
+                error=error,
+                **usage,
+            )
+
+
 # --- OpenAI -----------------------------------------------------------------
 
 def call_openai(prompt, schema=None, images=None, model=None):
@@ -67,8 +95,19 @@ def call_openai(prompt, schema=None, images=None, model=None):
     else:
         kwargs["response_format"] = {"type": "json_object"}
 
-    resp = client.chat.completions.create(**kwargs)
-    return json.loads(resp.choices[0].message.content or "{}")
+    def _do():
+        resp = client.chat.completions.create(**kwargs)
+        usage = {}
+        u = getattr(resp, "usage", None)
+        if u is not None:
+            usage = {
+                "input_tokens": getattr(u, "prompt_tokens", None),
+                "output_tokens": getattr(u, "completion_tokens", None),
+            }
+        return json.loads(resp.choices[0].message.content or "{}"), usage
+
+    kind = "vision" if images else "text"
+    return _traced("openai", model, kind, _do)
 
 
 # --- Anthropic --------------------------------------------------------------
@@ -98,13 +137,24 @@ def call_anthropic(prompt, schema=None, images=None, model=None):
         )
     content.append({"type": "text", "text": full_prompt})
 
-    msg = client.messages.create(
-        model=model,
-        max_tokens=4096,
-        messages=[{"role": "user", "content": content}],
-    )
-    text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
-    return json.loads(text)
+    def _do():
+        msg = client.messages.create(
+            model=model,
+            max_tokens=4096,
+            messages=[{"role": "user", "content": content}],
+        )
+        text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
+        usage = {}
+        u = getattr(msg, "usage", None)
+        if u is not None:
+            usage = {
+                "input_tokens": getattr(u, "input_tokens", None),
+                "output_tokens": getattr(u, "output_tokens", None),
+            }
+        return json.loads(text), usage
+
+    kind = "vision" if images else "text"
+    return _traced("anthropic", model, kind, _do)
 
 
 # --- Groq (text only) -------------------------------------------------------
@@ -125,8 +175,18 @@ def call_groq(prompt, schema=None, model=None):
     else:
         kwargs["response_format"] = {"type": "json_object"}
 
-    resp = client.chat.completions.create(**kwargs)
-    return json.loads(resp.choices[0].message.content or "{}")
+    def _do():
+        resp = client.chat.completions.create(**kwargs)
+        usage = {}
+        u = getattr(resp, "usage", None)
+        if u is not None:
+            usage = {
+                "input_tokens": getattr(u, "prompt_tokens", None),
+                "output_tokens": getattr(u, "completion_tokens", None),
+            }
+        return json.loads(resp.choices[0].message.content or "{}"), usage
+
+    return _traced("groq", model, "text", _do)
 
 
 # --- Dispatchers ------------------------------------------------------------

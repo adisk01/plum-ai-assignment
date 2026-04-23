@@ -23,6 +23,7 @@ from claims_processor.models.decision import Decision, DecisionStatus
 from claims_processor.models.documents import DocType, ParsedDocument
 from claims_processor.models.final import FinalDecision, StageError
 from claims_processor.models.fraud import FraudReport
+from claims_processor.observability import Tracer, get_tracer, set_tracer
 from claims_processor.rules_engine import financials, rules
 from claims_processor.rules_engine.evaluate import _all_line_items, _extract
 
@@ -42,30 +43,56 @@ class GraphState(TypedDict, total=False):
 # ------------------------------- nodes -------------------------------
 
 def parse_node(state: GraphState) -> dict:
+    tracer = get_tracer()
     parsed, errors = [], []
-    for d in state["claim_input"].get("documents", []):
-        file_id = d.get("file_id", "F000")
-        expected = DocType(d["actual_type"]) if d.get("actual_type") else None
-        try:
-            if "content" in d and expected is not None:
-                parsed.append(parse.parse_from_dict(file_id, expected, d["content"]))
-            elif "file_path" in d:
-                from pathlib import Path
-                p = Path(d["file_path"])
-                parsed.append(parse.parse_document(
-                    file_bytes=p.read_bytes(), file_ext=p.suffix,
-                    file_id=file_id, expected_type=expected,
-                ))
-            else:
+    docs = state["claim_input"].get("documents", [])
+
+    def _run():
+        for d in docs:
+            file_id = d.get("file_id", "F000")
+            expected = DocType(d["actual_type"]) if d.get("actual_type") else None
+            try:
+                if "content" in d and expected is not None:
+                    parsed.append(parse.parse_from_dict(file_id, expected, d["content"]))
+                    if tracer:
+                        tracer.event("doc_parsed", file_id=file_id, doc_type=expected.value,
+                                     source="dict")
+                elif "file_path" in d:
+                    from pathlib import Path
+                    p = Path(d["file_path"])
+                    parsed.append(parse.parse_document(
+                        file_bytes=p.read_bytes(), file_ext=p.suffix,
+                        file_id=file_id, expected_type=expected,
+                    ))
+                    if tracer:
+                        tracer.event("doc_parsed", file_id=file_id,
+                                     doc_type=expected.value if expected else None,
+                                     source=p.suffix.lstrip("."))
+                else:
+                    errors.append(StageError(stage="parse", file_id=file_id,
+                                             error_type="InvalidInput",
+                                             message="document has neither content nor file_path"))
+                    if tracer:
+                        tracer.event("doc_error", file_id=file_id, error_type="InvalidInput")
+            except (WrongDocumentTypeError, UnreadableDocumentError, UnsupportedFileTypeError) as e:
                 errors.append(StageError(stage="parse", file_id=file_id,
-                                         error_type="InvalidInput",
-                                         message="document has neither content nor file_path"))
-        except (WrongDocumentTypeError, UnreadableDocumentError, UnsupportedFileTypeError) as e:
-            errors.append(StageError(stage="parse", file_id=file_id,
-                                     error_type=type(e).__name__, message=str(e)))
-        except Exception as e:
-            errors.append(StageError(stage="parse", file_id=file_id,
-                                     error_type=type(e).__name__, message=str(e)))
+                                         error_type=type(e).__name__, message=str(e)))
+                if tracer:
+                    tracer.event("doc_error", file_id=file_id,
+                                 error_type=type(e).__name__, message=str(e))
+            except Exception as e:
+                errors.append(StageError(stage="parse", file_id=file_id,
+                                         error_type=type(e).__name__, message=str(e)))
+                if tracer:
+                    tracer.event("doc_error", file_id=file_id,
+                                 error_type=type(e).__name__, message=str(e))
+
+    if tracer:
+        with tracer.span("parse", doc_count=len(docs)):
+            _run()
+            tracer.annotate(parsed=len(parsed), errors=len(errors))
+    else:
+        _run()
 
     blocking = None
     if any(e.error_type in ("WrongDocumentTypeError", "UnreadableDocumentError") for e in errors):
@@ -75,17 +102,37 @@ def parse_node(state: GraphState) -> dict:
 
 
 def assemble_node(state: GraphState) -> dict:
+    tracer = get_tracer()
     ci = state["claim_input"]
-    claim = assemble_claim(
-        claim_id=state["claim_id"],
-        category=ci.get("claim_category") or ci.get("category"),
-        parsed_docs=state["parsed_docs"],
-    )
+
+    def _run():
+        return assemble_claim(
+            claim_id=state["claim_id"],
+            category=ci.get("claim_category") or ci.get("category"),
+            parsed_docs=state["parsed_docs"],
+        )
+
+    if tracer:
+        with tracer.span("assemble"):
+            claim = _run()
+            for iss in claim.issues:
+                tracer.event("consistency_issue",
+                             code=iss.code, severity=iss.severity, message=iss.message)
+            if claim.missing_documents:
+                tracer.event("missing_documents", missing=claim.missing_documents)
+            tracer.annotate(
+                issue_count=len(claim.issues),
+                missing_docs=len(claim.missing_documents),
+                has_errors=claim.has_errors(),
+            )
+    else:
+        claim = _run()
+
     blocking = "REJECTED" if claim.has_errors() else None
     return {"claim": claim, "blocking": blocking}
 
 
-def rules_node(state: GraphState) -> dict:
+def _run_rules(state: GraphState, tracer):
     ci = state["claim_input"]
     claim = state["claim"]
 
@@ -98,7 +145,6 @@ def rules_node(state: GraphState) -> dict:
     pre_auth_text = " | ".join([modality, diagnosis, *tests_ordered,
                                 *(getattr(li, "description", "") or "" for li in line_items)])
 
-    # Fall back to policy member join_date
     member_join_date = ci.get("member_join_date")
     if not member_join_date and ci.get("member_id"):
         m = config.get_member(ci["member_id"])
@@ -126,6 +172,20 @@ def rules_node(state: GraphState) -> dict:
     is_network = network_rule.evidence.get("in_network", False)
     payable = financials.compute_payable(claimed_amount, category, is_network=is_network)
 
+    if tracer:
+        for r in results:
+            tracer.event(
+                "rule_eval",
+                code=r.code, passed=r.passed, severity=r.severity, message=r.message,
+            )
+        tracer.event("payable_computed",
+                     claimed=payable.claimed_amount,
+                     after_network_discount=payable.after_network_discount,
+                     after_sub_limit=payable.after_sub_limit,
+                     copay=payable.copay_amount,
+                     payable=payable.payable,
+                     is_network=is_network)
+
     has_error = any((not r.passed) and r.severity == "error" for r in results)
     has_warning = any((not r.passed) and r.severity == "warning" for r in results)
 
@@ -139,27 +199,53 @@ def rules_node(state: GraphState) -> dict:
         status = DecisionStatus.APPROVED
         reason = f"All rules passed. Payable ₹{payable.payable}."
 
-    decision = Decision(
+    return Decision(
         claim_id=state["claim_id"], status=status, reason=reason,
         rules=results, payable=payable,
     )
+
+
+def rules_node(state: GraphState) -> dict:
+    tracer = get_tracer()
+    if tracer:
+        with tracer.span("rules"):
+            decision = _run_rules(state, tracer)
+            tracer.annotate(status=decision.status.value,
+                            payable=decision.payable.payable)
+    else:
+        decision = _run_rules(state, None)
     return {"decision": decision}
 
 
 def fraud_node(state: GraphState) -> dict:
+    tracer = get_tracer()
     ci = state["claim_input"]
     hospital = _extract(state["claim"].documents, DocType.HOSPITAL_BILL, "hospital_name") or ""
-    report = detect_fraud(
-        member_id=ci.get("member_id"),
-        claimed_amount=ci.get("claimed_amount"),
-        treatment_date=ci.get("treatment_date"),
-        claims_history=ci.get("claims_history"),
-        provider=hospital,
-    )
+
+    def _run():
+        return detect_fraud(
+            member_id=ci.get("member_id"),
+            claimed_amount=ci.get("claimed_amount"),
+            treatment_date=ci.get("treatment_date"),
+            claims_history=ci.get("claims_history"),
+            provider=hospital,
+        )
+
+    if tracer:
+        with tracer.span("fraud"):
+            report = _run()
+            for sig in report.signals:
+                tracer.event("fraud_signal",
+                             code=sig.code, severity=sig.severity,
+                             weight=sig.weight, message=sig.message)
+            tracer.annotate(score=report.score,
+                            needs_manual_review=report.needs_manual_review)
+    else:
+        report = _run()
     return {"fraud": report}
 
 
-def finalize_node(state: GraphState) -> dict:
+def _build_final(state: GraphState) -> FinalDecision:
     blocking = state.get("blocking")
     stage_errors = state.get("stage_errors") or []
     claim = state.get("claim")
@@ -167,21 +253,19 @@ def finalize_node(state: GraphState) -> dict:
     fraud = state.get("fraud")
     notes = []
 
-    # Short-circuit cases (hit before the full pipeline completed)
     if blocking == "NEEDS_REUPLOAD":
         err = next(e for e in stage_errors
                    if e.error_type in ("WrongDocumentTypeError", "UnreadableDocumentError"))
-        final = FinalDecision(
+        return FinalDecision(
             claim_id=state["claim_id"],
             status=DecisionStatus.NEEDS_REUPLOAD,
             reason=err.message,
             confidence=0.0,
             stage_errors=stage_errors,
         )
-        return {"final": final}
 
     if blocking == "REJECTED":
-        final = FinalDecision(
+        return FinalDecision(
             claim_id=state["claim_id"],
             status=DecisionStatus.REJECTED,
             reason="Claim has consistency errors; rejecting before policy rules.",
@@ -189,9 +273,7 @@ def finalize_node(state: GraphState) -> dict:
             claim=claim,
             stage_errors=stage_errors,
         )
-        return {"final": final}
 
-    # Normal path: attach fraud to decision, pick final status
     if decision and fraud:
         decision = decision.model_copy(update={"fraud": fraud})
         if decision.status == DecisionStatus.APPROVED and fraud.needs_manual_review:
@@ -201,7 +283,6 @@ def finalize_node(state: GraphState) -> dict:
                 "reason": f"Flagged for manual review: {top.message}",
             })
 
-    # Confidence
     confidence = 1.0
     if stage_errors:
         confidence -= 0.3 * len(stage_errors)
@@ -216,7 +297,7 @@ def finalize_node(state: GraphState) -> dict:
         confidence -= 0.3
     confidence = max(0.0, min(1.0, confidence))
 
-    final = FinalDecision(
+    return FinalDecision(
         claim_id=state["claim_id"],
         status=decision.status if decision else DecisionStatus.MANUAL_REVIEW,
         reason=decision.reason if decision else "No decision produced.",
@@ -226,6 +307,18 @@ def finalize_node(state: GraphState) -> dict:
         stage_errors=stage_errors,
         notes=notes,
     )
+
+
+def finalize_node(state: GraphState) -> dict:
+    tracer = get_tracer()
+    if tracer:
+        with tracer.span("finalize"):
+            final = _build_final(state)
+            tracer.annotate(status=final.status.value,
+                            confidence=final.confidence,
+                            stage_errors=len(final.stage_errors))
+    else:
+        final = _build_final(state)
     return {"final": final}
 
 
@@ -264,9 +357,22 @@ def build_graph():
 _graph = None
 
 
-def run_graph(claim_input: dict, claim_id: str = "CLAIM") -> FinalDecision:
+def run_graph(claim_input: dict, claim_id: str = "CLAIM",
+              trace: bool = True) -> FinalDecision:
+    """Run the claims pipeline. Set trace=False to skip tracing entirely."""
     global _graph
     if _graph is None:
         _graph = build_graph()
-    result = _graph.invoke({"claim_input": claim_input, "claim_id": claim_id})
-    return result["final"]
+
+    tracer = Tracer(claim_id=claim_id) if trace else None
+    prev = get_tracer()
+    set_tracer(tracer)
+    try:
+        result = _graph.invoke({"claim_input": claim_input, "claim_id": claim_id})
+    finally:
+        set_tracer(prev)
+
+    final = result["final"]
+    if tracer is not None:
+        final = final.model_copy(update={"trace": tracer.finish()})
+    return final

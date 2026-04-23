@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from claims_processor.models.claim import Claim
 from claims_processor.models.decision import Decision, DecisionStatus
+from claims_processor.observability.trace import Trace
 
 
 class StageError(BaseModel):
@@ -24,3 +25,4 @@ class FinalDecision(BaseModel):
     decision: Optional[Decision] = None
     stage_errors: list[StageError] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
+    trace: Optional[Trace] = None
