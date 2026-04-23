@@ -55,9 +55,9 @@ def test_minimum_amount_below_floor():
     assert not r.passed and r.severity == "error"
 
 
-def test_per_claim_limit_warns_not_rejects():
+def test_per_claim_limit_rejects():
     r = rules.check_per_claim_limit(8000)
-    assert not r.passed and r.severity == "warning"
+    assert not r.passed and r.severity == "error"
 
 
 def test_waiting_period_diabetes():
@@ -111,7 +111,7 @@ def test_evaluate_short_circuits_on_consistency_errors():
     assert "consistency" in d.reason.lower()
 
 
-def test_evaluate_per_claim_limit_needs_review():
+def test_evaluate_per_claim_limit_rejected():
     docs = [
         _doc(DocType.PRESCRIPTION, Prescription(patient_name="A", diagnosis="Fever")),
         _doc(DocType.HOSPITAL_BILL, HospitalBill(patient_name="A", hospital_name="Apollo Hospitals", total=8000)),
@@ -121,7 +121,7 @@ def test_evaluate_per_claim_limit_needs_review():
         claim, claimed_amount=8000, treatment_date="2024-11-01",
         member_join_date="2024-04-01", submission_date=date(2024, 11, 10),
     )
-    assert d.status == DecisionStatus.NEEDS_REVIEW
+    assert d.status == DecisionStatus.REJECTED
 
 
 def test_evaluate_rejects_mri_without_preauth():

@@ -38,3 +38,13 @@ def get_document_requirements(claim_category, policy=None):
 def list_claim_categories(policy=None):
     policy = policy or load_policy_terms()
     return sorted(policy["document_requirements"].keys())
+
+
+def get_member(member_id, policy=None):
+    if not member_id:
+        return None
+    policy = policy or load_policy_terms()
+    for m in policy.get("members", []):
+        if m.get("member_id") == member_id:
+            return m
+    return None

@@ -19,6 +19,7 @@ recorded as a StageError with a reduced confidence rather than a hard crash
 from pathlib import Path
 
 from claims_processor.claim_assembler.assemble import assemble_claim
+from claims_processor.core import config
 from claims_processor.document_extractor import parse
 from claims_processor.document_extractor.exceptions import (
     UnreadableDocumentError,
@@ -112,15 +113,24 @@ def process_claim(claim_input, claim_id=None):
     # date (keeps tests stable and mirrors the brief, where submission timing
     # isn't the subject under test except where explicitly set).
     submission_date = claim_input.get("submission_date") or claim_input.get("treatment_date")
+
+    # Pull join_date from the policy's members list if the caller didn't set one
+    member_id = claim_input.get("member_id")
+    member_join_date = claim_input.get("member_join_date")
+    if not member_join_date and member_id:
+        member = config.get_member(member_id)
+        if member:
+            member_join_date = member.get("join_date")
+
     try:
         decision = evaluate_claim(
             claim=claim,
             claimed_amount=claim_input.get("claimed_amount"),
             treatment_date=claim_input.get("treatment_date"),
-            member_join_date=claim_input.get("member_join_date"),
+            member_join_date=member_join_date,
             pre_auth_provided=claim_input.get("pre_auth_provided", False),
             submission_date=submission_date,
-            member_id=claim_input.get("member_id"),
+            member_id=member_id,
             claims_history=claim_input.get("claims_history"),
         )
     except Exception as e:

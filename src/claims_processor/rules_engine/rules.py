@@ -50,15 +50,16 @@ def check_minimum_amount(claimed_amount, policy=None):
 
 
 def check_per_claim_limit(claimed_amount, policy=None):
-    """TC008: if amount > per_claim_limit we flag for review but don't reject."""
+    """TC008: amount > per_claim_limit -> REJECTED."""
     policy = policy or config.load_policy_terms()
     limit = policy["coverage"]["per_claim_limit"]
     ok = claimed_amount <= limit
     return RuleResult(
         code="PER_CLAIM_LIMIT",
         passed=ok,
-        severity="warning" if not ok else "info",
-        message=f"Claim {claimed_amount} vs per-claim limit {limit}",
+        severity="error" if not ok else "info",
+        message=f"Claim ₹{claimed_amount} exceeds per-claim limit ₹{limit}" if not ok
+                else f"Claim ₹{claimed_amount} within per-claim limit ₹{limit}",
         evidence={"limit": limit, "claimed": claimed_amount},
     )
 
