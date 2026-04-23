@@ -5,11 +5,14 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from claims_processor.models.fraud import FraudReport
+
 
 class DecisionStatus(str, Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     NEEDS_REVIEW = "NEEDS_REVIEW"
+    MANUAL_REVIEW = "MANUAL_REVIEW"
 
 
 class RuleResult(BaseModel):
@@ -35,3 +38,4 @@ class Decision(BaseModel):
     reason: str = ""
     rules: list[RuleResult] = Field(default_factory=list)
     payable: Optional[PayableBreakdown] = None
+    fraud: Optional[FraudReport] = None
