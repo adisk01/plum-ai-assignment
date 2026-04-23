@@ -9,7 +9,7 @@
       "payable": null,
       "confidence": 0.5,
       "reason": "Claim has consistency errors; rejecting before policy rules.",
-      "trace_ms": 2.4,
+      "trace_ms": 1.4,
       "span_count": 3
     },
     {
@@ -21,7 +21,7 @@
       "payable": null,
       "confidence": 0.5,
       "reason": "Claim has consistency errors; rejecting before policy rules.",
-      "trace_ms": 0.6,
+      "trace_ms": 0.7,
       "span_count": 3
     },
     {
@@ -33,7 +33,7 @@
       "payable": null,
       "confidence": 0.5,
       "reason": "Claim has consistency errors; rejecting before policy rules.",
-      "trace_ms": 0.5,
+      "trace_ms": 0.6,
       "span_count": 3
     },
     {
@@ -45,7 +45,7 @@
       "payable": 1350.0,
       "confidence": 1.0,
       "reason": "All rules passed. Payable \u20b91350.0.",
-      "trace_ms": 2.5,
+      "trace_ms": 2.1,
       "span_count": 5
     },
     {
@@ -57,18 +57,18 @@
       "payable": 1800.0,
       "confidence": 1.0,
       "reason": "diabetes waiting period not met (44d < 90d)",
-      "trace_ms": 1.7,
+      "trace_ms": 3.0,
       "span_count": 5
     },
     {
       "case_id": "TC006",
       "description": "Bill includes root canal treatment (covered) and teeth whitening (cosmetic, excluded). System must approve only the covered procedure.",
       "expected": "PARTIAL",
-      "actual": "REJECTED",
-      "match": false,
-      "payable": 10000.0,
+      "actual": "PARTIAL",
+      "match": true,
+      "payable": 8000.0,
       "confidence": 1.0,
-      "reason": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+      "reason": "1 of 2 line item(s) excluded; remainder payable. Approved \u20b98000.0.",
       "trace_ms": 1.5,
       "span_count": 5
     },
@@ -80,8 +80,8 @@
       "match": true,
       "payable": 10000.0,
       "confidence": 1.0,
-      "reason": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
-      "trace_ms": 1.3,
+      "reason": "Covered \u20b915000.0 exceeds effective per-claim limit \u20b910000",
+      "trace_ms": 1.4,
       "span_count": 5
     },
     {
@@ -92,8 +92,8 @@
       "match": true,
       "payable": 1800.0,
       "confidence": 1.0,
-      "reason": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
-      "trace_ms": 1.3,
+      "reason": "Covered \u20b97500.0 exceeds effective per-claim limit \u20b95000",
+      "trace_ms": 1.4,
       "span_count": 5
     },
     {
@@ -117,7 +117,7 @@
       "payable": 1800.0,
       "confidence": 1.0,
       "reason": "All rules passed. Payable \u20b91800.0.",
-      "trace_ms": 1.2,
+      "trace_ms": 1.4,
       "span_count": 5
     },
     {
@@ -129,7 +129,7 @@
       "payable": 4000.0,
       "confidence": 0.7,
       "reason": "All rules passed. Payable \u20b94000.0.",
-      "trace_ms": 1.3,
+      "trace_ms": 1.4,
       "span_count": 5
     },
     {
@@ -140,7 +140,7 @@
       "match": true,
       "payable": 1800.0,
       "confidence": 1.0,
-      "reason": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+      "reason": "Diagnosis matches policy exclusion: Obesity and weight loss programs",
       "trace_ms": 1.4,
       "span_count": 5
     }
@@ -201,23 +201,23 @@
         ],
         "notes": [],
         "trace": {
-          "trace_id": "0af6d6d04881",
+          "trace_id": "fe8468aae04e",
           "claim_id": "TC001",
-          "started_at": "2026-04-23T20:47:21.340866+00:00",
-          "ended_at": "2026-04-23T20:47:21.343384+00:00",
-          "duration_ms": 2.41,
+          "started_at": "2026-04-23T22:28:52.113987+00:00",
+          "ended_at": "2026-04-23T22:28:52.115535+00:00",
+          "duration_ms": 1.44,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.342310+00:00",
-              "ended_at": "2026-04-23T20:47:21.342712+00:00",
+              "started_at": "2026-04-23T22:28:52.114932+00:00",
+              "ended_at": "2026-04-23T22:28:52.114962+00:00",
               "duration_ms": 0.02,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_error",
-                  "at": "2026-04-23T20:47:21.342703+00:00",
+                  "at": "2026-04-23T22:28:52.114954+00:00",
                   "attrs": {
                     "file_id": "F001",
                     "error_type": "InvalidInput"
@@ -225,7 +225,7 @@
                 },
                 {
                   "name": "doc_error",
-                  "at": "2026-04-23T20:47:21.342709+00:00",
+                  "at": "2026-04-23T22:28:52.114959+00:00",
                   "attrs": {
                     "file_id": "F002",
                     "error_type": "InvalidInput"
@@ -240,15 +240,15 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.342912+00:00",
-              "ended_at": "2026-04-23T20:47:21.343163+00:00",
-              "duration_ms": 0.25,
+              "started_at": "2026-04-23T22:28:52.115178+00:00",
+              "ended_at": "2026-04-23T22:28:52.115294+00:00",
+              "duration_ms": 0.11,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "consistency_issue",
-                  "at": "2026-04-23T20:47:21.343154+00:00",
+                  "at": "2026-04-23T22:28:52.115284+00:00",
                   "attrs": {
                     "code": "MISSING_REQUIRED_DOCUMENT",
                     "severity": "error",
@@ -257,7 +257,7 @@
                 },
                 {
                   "name": "consistency_issue",
-                  "at": "2026-04-23T20:47:21.343157+00:00",
+                  "at": "2026-04-23T22:28:52.115287+00:00",
                   "attrs": {
                     "code": "MISSING_REQUIRED_DOCUMENT",
                     "severity": "error",
@@ -266,7 +266,7 @@
                 },
                 {
                   "name": "missing_documents",
-                  "at": "2026-04-23T20:47:21.343159+00:00",
+                  "at": "2026-04-23T22:28:52.115289+00:00",
                   "attrs": {
                     "missing": [
                       "PRESCRIPTION",
@@ -283,8 +283,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.343298+00:00",
-              "ended_at": "2026-04-23T20:47:21.343307+00:00",
+              "started_at": "2026-04-23T22:28:52.115454+00:00",
+              "ended_at": "2026-04-23T22:28:52.115464+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -354,23 +354,23 @@
         ],
         "notes": [],
         "trace": {
-          "trace_id": "ccd4ae166e9c",
+          "trace_id": "2de4ac0352a2",
           "claim_id": "TC002",
-          "started_at": "2026-04-23T20:47:21.343435+00:00",
-          "ended_at": "2026-04-23T20:47:21.344036+00:00",
-          "duration_ms": 0.6,
+          "started_at": "2026-04-23T22:28:52.115601+00:00",
+          "ended_at": "2026-04-23T22:28:52.116332+00:00",
+          "duration_ms": 0.73,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.343656+00:00",
-              "ended_at": "2026-04-23T20:47:21.343671+00:00",
+              "started_at": "2026-04-23T22:28:52.115861+00:00",
+              "ended_at": "2026-04-23T22:28:52.115878+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_error",
-                  "at": "2026-04-23T20:47:21.343665+00:00",
+                  "at": "2026-04-23T22:28:52.115872+00:00",
                   "attrs": {
                     "file_id": "F003",
                     "error_type": "InvalidInput"
@@ -378,7 +378,7 @@
                 },
                 {
                   "name": "doc_error",
-                  "at": "2026-04-23T20:47:21.343669+00:00",
+                  "at": "2026-04-23T22:28:52.115876+00:00",
                   "attrs": {
                     "file_id": "F004",
                     "error_type": "InvalidInput"
@@ -393,15 +393,15 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.343786+00:00",
-              "ended_at": "2026-04-23T20:47:21.343866+00:00",
-              "duration_ms": 0.08,
+              "started_at": "2026-04-23T22:28:52.116030+00:00",
+              "ended_at": "2026-04-23T22:28:52.116120+00:00",
+              "duration_ms": 0.09,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "consistency_issue",
-                  "at": "2026-04-23T20:47:21.343859+00:00",
+                  "at": "2026-04-23T22:28:52.116112+00:00",
                   "attrs": {
                     "code": "MISSING_REQUIRED_DOCUMENT",
                     "severity": "error",
@@ -410,7 +410,7 @@
                 },
                 {
                   "name": "consistency_issue",
-                  "at": "2026-04-23T20:47:21.343861+00:00",
+                  "at": "2026-04-23T22:28:52.116115+00:00",
                   "attrs": {
                     "code": "MISSING_REQUIRED_DOCUMENT",
                     "severity": "error",
@@ -419,7 +419,7 @@
                 },
                 {
                   "name": "missing_documents",
-                  "at": "2026-04-23T20:47:21.343863+00:00",
+                  "at": "2026-04-23T22:28:52.116117+00:00",
                   "attrs": {
                     "missing": [
                       "PRESCRIPTION",
@@ -436,8 +436,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.343970+00:00",
-              "ended_at": "2026-04-23T20:47:21.343978+00:00",
+              "started_at": "2026-04-23T22:28:52.116260+00:00",
+              "ended_at": "2026-04-23T22:28:52.116267+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -507,23 +507,23 @@
         ],
         "notes": [],
         "trace": {
-          "trace_id": "00d6941cc11d",
+          "trace_id": "625412229960",
           "claim_id": "TC003",
-          "started_at": "2026-04-23T20:47:21.344067+00:00",
-          "ended_at": "2026-04-23T20:47:21.344606+00:00",
-          "duration_ms": 0.54,
+          "started_at": "2026-04-23T22:28:52.116382+00:00",
+          "ended_at": "2026-04-23T22:28:52.116974+00:00",
+          "duration_ms": 0.59,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.344239+00:00",
-              "ended_at": "2026-04-23T20:47:21.344250+00:00",
+              "started_at": "2026-04-23T22:28:52.116576+00:00",
+              "ended_at": "2026-04-23T22:28:52.116586+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_error",
-                  "at": "2026-04-23T20:47:21.344245+00:00",
+                  "at": "2026-04-23T22:28:52.116581+00:00",
                   "attrs": {
                     "file_id": "F005",
                     "error_type": "InvalidInput"
@@ -531,7 +531,7 @@
                 },
                 {
                   "name": "doc_error",
-                  "at": "2026-04-23T20:47:21.344248+00:00",
+                  "at": "2026-04-23T22:28:52.116584+00:00",
                   "attrs": {
                     "file_id": "F006",
                     "error_type": "InvalidInput"
@@ -546,15 +546,15 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.344360+00:00",
-              "ended_at": "2026-04-23T20:47:21.344437+00:00",
+              "started_at": "2026-04-23T22:28:52.116711+00:00",
+              "ended_at": "2026-04-23T22:28:52.116787+00:00",
               "duration_ms": 0.07,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "consistency_issue",
-                  "at": "2026-04-23T20:47:21.344430+00:00",
+                  "at": "2026-04-23T22:28:52.116780+00:00",
                   "attrs": {
                     "code": "MISSING_REQUIRED_DOCUMENT",
                     "severity": "error",
@@ -563,7 +563,7 @@
                 },
                 {
                   "name": "consistency_issue",
-                  "at": "2026-04-23T20:47:21.344432+00:00",
+                  "at": "2026-04-23T22:28:52.116782+00:00",
                   "attrs": {
                     "code": "MISSING_REQUIRED_DOCUMENT",
                     "severity": "error",
@@ -572,7 +572,7 @@
                 },
                 {
                   "name": "missing_documents",
-                  "at": "2026-04-23T20:47:21.344434+00:00",
+                  "at": "2026-04-23T22:28:52.116784+00:00",
                   "attrs": {
                     "missing": [
                       "PRESCRIPTION",
@@ -589,9 +589,9 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.344544+00:00",
-              "ended_at": "2026-04-23T20:47:21.344550+00:00",
-              "duration_ms": 0.01,
+              "started_at": "2026-04-23T22:28:52.116912+00:00",
+              "ended_at": "2026-04-23T22:28:52.116918+00:00",
+              "duration_ms": 0.0,
               "status": "ok",
               "error": null,
               "events": [],
@@ -714,10 +714,13 @@
               "code": "PER_CLAIM_LIMIT",
               "passed": true,
               "severity": "info",
-              "message": "Claim \u20b91500 within per-claim limit \u20b95000",
+              "message": "Covered \u20b91500.0 within effective per-claim limit \u20b95000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 1500
+                "per_claim_limit": 5000,
+                "category_sub_limit": 2000,
+                "effective_limit": 5000,
+                "checked": 1500.0,
+                "scope": "covered"
               }
             },
             {
@@ -756,7 +759,8 @@
               "severity": "info",
               "message": "No excluded items",
               "evidence": {
-                "hits": []
+                "hits": [],
+                "excluded_descriptions": []
               }
             },
             {
@@ -771,10 +775,31 @@
           ],
           "payable": {
             "claimed_amount": 1500.0,
+            "after_exclusions": 1500.0,
             "after_network_discount": 1500.0,
             "after_sub_limit": 1500.0,
             "copay_amount": 150.0,
             "payable": 1350.0,
+            "line_items": [
+              {
+                "description": "Consultation Fee",
+                "amount": 1000.0,
+                "covered": true,
+                "reason": ""
+              },
+              {
+                "description": "CBC Test",
+                "amount": 300.0,
+                "covered": true,
+                "reason": ""
+              },
+              {
+                "description": "Dengue NS1 Test",
+                "amount": 200.0,
+                "covered": true,
+                "reason": ""
+              }
+            ],
             "notes": [
               "Applied 10% copay (\u20b9150.0)"
             ]
@@ -829,23 +854,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "0918da776625",
+          "trace_id": "320e9a5c1f94",
           "claim_id": "TC004",
-          "started_at": "2026-04-23T20:47:21.344633+00:00",
-          "ended_at": "2026-04-23T20:47:21.347160+00:00",
-          "duration_ms": 2.53,
+          "started_at": "2026-04-23T22:28:52.117016+00:00",
+          "ended_at": "2026-04-23T22:28:52.119106+00:00",
+          "duration_ms": 2.09,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.344799+00:00",
-              "ended_at": "2026-04-23T20:47:21.344839+00:00",
+              "started_at": "2026-04-23T22:28:52.117196+00:00",
+              "ended_at": "2026-04-23T22:28:52.117235+00:00",
               "duration_ms": 0.04,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.344821+00:00",
+                  "at": "2026-04-23T22:28:52.117218+00:00",
                   "attrs": {
                     "file_id": "F007",
                     "doc_type": "PRESCRIPTION",
@@ -854,7 +879,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.344837+00:00",
+                  "at": "2026-04-23T22:28:52.117233+00:00",
                   "attrs": {
                     "file_id": "F008",
                     "doc_type": "HOSPITAL_BILL",
@@ -870,8 +895,8 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.344950+00:00",
-              "ended_at": "2026-04-23T20:47:21.345023+00:00",
+              "started_at": "2026-04-23T22:28:52.117359+00:00",
+              "ended_at": "2026-04-23T22:28:52.117429+00:00",
               "duration_ms": 0.07,
               "status": "ok",
               "error": null,
@@ -884,15 +909,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.345155+00:00",
-              "ended_at": "2026-04-23T20:47:21.346574+00:00",
-              "duration_ms": 1.42,
+              "started_at": "2026-04-23T22:28:52.117572+00:00",
+              "ended_at": "2026-04-23T22:28:52.118712+00:00",
+              "duration_ms": 1.14,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346547+00:00",
+                  "at": "2026-04-23T22:28:52.118689+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -902,7 +927,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346551+00:00",
+                  "at": "2026-04-23T22:28:52.118692+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -912,17 +937,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346554+00:00",
+                  "at": "2026-04-23T22:28:52.118694+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
                     "passed": true,
                     "severity": "info",
-                    "message": "Claim \u20b91500 within per-claim limit \u20b95000"
+                    "message": "Covered \u20b91500.0 within effective per-claim limit \u20b95000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346556+00:00",
+                  "at": "2026-04-23T22:28:52.118696+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -932,7 +957,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346558+00:00",
+                  "at": "2026-04-23T22:28:52.118697+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -942,7 +967,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346560+00:00",
+                  "at": "2026-04-23T22:28:52.118699+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -952,7 +977,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346562+00:00",
+                  "at": "2026-04-23T22:28:52.118700+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": true,
@@ -962,7 +987,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.346564+00:00",
+                  "at": "2026-04-23T22:28:52.118702+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -972,14 +997,16 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.346566+00:00",
+                  "at": "2026-04-23T22:28:52.118704+00:00",
                   "attrs": {
                     "claimed": 1500.0,
+                    "after_exclusions": 1500.0,
                     "after_network_discount": 1500.0,
                     "after_sub_limit": 1500.0,
                     "copay": 150.0,
                     "payable": 1350.0,
-                    "is_network": false
+                    "is_network": false,
+                    "excluded_items": []
                   }
                 }
               ],
@@ -990,15 +1017,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.346705+00:00",
-              "ended_at": "2026-04-23T20:47:21.346989+00:00",
-              "duration_ms": 0.28,
+              "started_at": "2026-04-23T22:28:52.118844+00:00",
+              "ended_at": "2026-04-23T22:28:52.118934+00:00",
+              "duration_ms": 0.09,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.346793+00:00",
+                  "at": "2026-04-23T22:28:52.118926+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -1008,7 +1035,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.346796+00:00",
+                  "at": "2026-04-23T22:28:52.118929+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -1018,7 +1045,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.346798+00:00",
+                  "at": "2026-04-23T22:28:52.118930+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -1028,7 +1055,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.346986+00:00",
+                  "at": "2026-04-23T22:28:52.118932+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -1044,8 +1071,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.347087+00:00",
-              "ended_at": "2026-04-23T20:47:21.347101+00:00",
+              "started_at": "2026-04-23T22:28:52.119039+00:00",
+              "ended_at": "2026-04-23T22:28:52.119050+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -1150,10 +1177,13 @@
               "code": "PER_CLAIM_LIMIT",
               "passed": true,
               "severity": "info",
-              "message": "Claim \u20b93000 within per-claim limit \u20b95000",
+              "message": "Claimed \u20b93000 within effective per-claim limit \u20b95000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 3000
+                "per_claim_limit": 5000,
+                "category_sub_limit": 2000,
+                "effective_limit": 5000,
+                "checked": 3000,
+                "scope": "claimed"
               }
             },
             {
@@ -1196,7 +1226,8 @@
               "severity": "info",
               "message": "No excluded items",
               "evidence": {
-                "hits": []
+                "hits": [],
+                "excluded_descriptions": []
               }
             },
             {
@@ -1211,10 +1242,12 @@
           ],
           "payable": {
             "claimed_amount": 3000.0,
+            "after_exclusions": null,
             "after_network_discount": 2400.0,
             "after_sub_limit": 2000.0,
             "copay_amount": 200.0,
             "payable": 1800.0,
+            "line_items": [],
             "notes": [
               "Applied 20% network discount",
               "Capped at category sub-limit \u20b92000",
@@ -1271,23 +1304,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "958b3122a47d",
+          "trace_id": "72135b8cf7eb",
           "claim_id": "TC005",
-          "started_at": "2026-04-23T20:47:21.347378+00:00",
-          "ended_at": "2026-04-23T20:47:21.349120+00:00",
-          "duration_ms": 1.74,
+          "started_at": "2026-04-23T22:28:52.119378+00:00",
+          "ended_at": "2026-04-23T22:28:52.122361+00:00",
+          "duration_ms": 2.98,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.347582+00:00",
-              "ended_at": "2026-04-23T20:47:21.347607+00:00",
+              "started_at": "2026-04-23T22:28:52.119640+00:00",
+              "ended_at": "2026-04-23T22:28:52.119666+00:00",
               "duration_ms": 0.02,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.347597+00:00",
+                  "at": "2026-04-23T22:28:52.119657+00:00",
                   "attrs": {
                     "file_id": "F009",
                     "doc_type": "PRESCRIPTION",
@@ -1296,7 +1329,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.347605+00:00",
+                  "at": "2026-04-23T22:28:52.119664+00:00",
                   "attrs": {
                     "file_id": "F010",
                     "doc_type": "HOSPITAL_BILL",
@@ -1312,9 +1345,9 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.347728+00:00",
-              "ended_at": "2026-04-23T20:47:21.347803+00:00",
-              "duration_ms": 0.07,
+              "started_at": "2026-04-23T22:28:52.119829+00:00",
+              "ended_at": "2026-04-23T22:28:52.119916+00:00",
+              "duration_ms": 0.09,
               "status": "ok",
               "error": null,
               "events": [],
@@ -1326,15 +1359,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.347914+00:00",
-              "ended_at": "2026-04-23T20:47:21.348666+00:00",
-              "duration_ms": 0.75,
+              "started_at": "2026-04-23T22:28:52.121409+00:00",
+              "ended_at": "2026-04-23T22:28:52.121985+00:00",
+              "duration_ms": 0.57,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348636+00:00",
+                  "at": "2026-04-23T22:28:52.121962+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -1344,7 +1377,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348642+00:00",
+                  "at": "2026-04-23T22:28:52.121965+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -1354,17 +1387,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348644+00:00",
+                  "at": "2026-04-23T22:28:52.121967+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
                     "passed": true,
                     "severity": "info",
-                    "message": "Claim \u20b93000 within per-claim limit \u20b95000"
+                    "message": "Claimed \u20b93000 within effective per-claim limit \u20b95000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348646+00:00",
+                  "at": "2026-04-23T22:28:52.121968+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -1374,7 +1407,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348648+00:00",
+                  "at": "2026-04-23T22:28:52.121970+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": false,
@@ -1384,7 +1417,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348650+00:00",
+                  "at": "2026-04-23T22:28:52.121971+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -1394,7 +1427,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348651+00:00",
+                  "at": "2026-04-23T22:28:52.121973+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": true,
@@ -1404,7 +1437,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.348653+00:00",
+                  "at": "2026-04-23T22:28:52.121974+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -1414,14 +1447,16 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.348656+00:00",
+                  "at": "2026-04-23T22:28:52.121977+00:00",
                   "attrs": {
                     "claimed": 3000.0,
+                    "after_exclusions": null,
                     "after_network_discount": 2400.0,
                     "after_sub_limit": 2000.0,
                     "copay": 200.0,
                     "payable": 1800.0,
-                    "is_network": true
+                    "is_network": true,
+                    "excluded_items": []
                   }
                 }
               ],
@@ -1432,15 +1467,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.348817+00:00",
-              "ended_at": "2026-04-23T20:47:21.348927+00:00",
-              "duration_ms": 0.11,
+              "started_at": "2026-04-23T22:28:52.122105+00:00",
+              "ended_at": "2026-04-23T22:28:52.122190+00:00",
+              "duration_ms": 0.08,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.348919+00:00",
+                  "at": "2026-04-23T22:28:52.122180+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -1450,7 +1485,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.348922+00:00",
+                  "at": "2026-04-23T22:28:52.122183+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -1460,7 +1495,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.348923+00:00",
+                  "at": "2026-04-23T22:28:52.122184+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -1470,7 +1505,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.348925+00:00",
+                  "at": "2026-04-23T22:28:52.122187+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -1486,8 +1521,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.349037+00:00",
-              "ended_at": "2026-04-23T20:47:21.349053+00:00",
+              "started_at": "2026-04-23T22:28:52.122292+00:00",
+              "ended_at": "2026-04-23T22:28:52.122303+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -1508,8 +1543,8 @@
       "expected": "PARTIAL",
       "final": {
         "claim_id": "TC006",
-        "status": "REJECTED",
-        "reason": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+        "status": "PARTIAL",
+        "reason": "1 of 2 line item(s) excluded; remainder payable. Approved \u20b98000.0.",
         "confidence": 1.0,
         "claim": {
           "claim_id": "TC006",
@@ -1552,8 +1587,8 @@
         },
         "decision": {
           "claim_id": "TC006",
-          "status": "REJECTED",
-          "reason": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+          "status": "PARTIAL",
+          "reason": "1 of 2 line item(s) excluded; remainder payable. Approved \u20b98000.0.",
           "rules": [
             {
               "code": "CATEGORY_COVERED",
@@ -1574,12 +1609,15 @@
             },
             {
               "code": "PER_CLAIM_LIMIT",
-              "passed": false,
-              "severity": "error",
-              "message": "Claim \u20b912000 exceeds per-claim limit \u20b95000",
+              "passed": true,
+              "severity": "info",
+              "message": "Covered \u20b98000.0 within effective per-claim limit \u20b910000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 12000
+                "per_claim_limit": 5000,
+                "category_sub_limit": 10000,
+                "effective_limit": 10000,
+                "checked": 8000.0,
+                "scope": "covered"
               }
             },
             {
@@ -1615,14 +1653,17 @@
             {
               "code": "EXCLUSIONS",
               "passed": false,
-              "severity": "error",
-              "message": "1 excluded item(s) found",
+              "severity": "partial",
+              "message": "1 of 2 line item(s) excluded; remainder payable",
               "evidence": {
                 "hits": [
                   {
                     "item": "Teeth Whitening",
                     "matched": "teeth whitening"
                   }
+                ],
+                "excluded_descriptions": [
+                  "Teeth Whitening"
                 ]
               }
             },
@@ -1638,12 +1679,27 @@
           ],
           "payable": {
             "claimed_amount": 12000.0,
-            "after_network_discount": 12000.0,
-            "after_sub_limit": 10000.0,
+            "after_exclusions": 8000.0,
+            "after_network_discount": 8000.0,
+            "after_sub_limit": 8000.0,
             "copay_amount": 0.0,
-            "payable": 10000.0,
+            "payable": 8000.0,
+            "line_items": [
+              {
+                "description": "Root Canal Treatment",
+                "amount": 8000.0,
+                "covered": true,
+                "reason": ""
+              },
+              {
+                "description": "Teeth Whitening",
+                "amount": 4000.0,
+                "covered": false,
+                "reason": "Excluded under policy"
+              }
+            ],
             "notes": [
-              "Capped at category sub-limit \u20b910000"
+              "Excluded \u20b94000 across 1 item(s)"
             ]
           },
           "fraud": {
@@ -1696,23 +1752,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "b81967b2b3c1",
+          "trace_id": "bba011a961d9",
           "claim_id": "TC006",
-          "started_at": "2026-04-23T20:47:21.349199+00:00",
-          "ended_at": "2026-04-23T20:47:21.350688+00:00",
-          "duration_ms": 1.49,
+          "started_at": "2026-04-23T22:28:52.122441+00:00",
+          "ended_at": "2026-04-23T22:28:52.123911+00:00",
+          "duration_ms": 1.47,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.349411+00:00",
-              "ended_at": "2026-04-23T20:47:21.349431+00:00",
-              "duration_ms": 0.02,
+              "started_at": "2026-04-23T22:28:52.122645+00:00",
+              "ended_at": "2026-04-23T22:28:52.122661+00:00",
+              "duration_ms": 0.01,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.349428+00:00",
+                  "at": "2026-04-23T22:28:52.122658+00:00",
                   "attrs": {
                     "file_id": "F011",
                     "doc_type": "HOSPITAL_BILL",
@@ -1728,9 +1784,9 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.349553+00:00",
-              "ended_at": "2026-04-23T20:47:21.349628+00:00",
-              "duration_ms": 0.07,
+              "started_at": "2026-04-23T22:28:52.122794+00:00",
+              "ended_at": "2026-04-23T22:28:52.122859+00:00",
+              "duration_ms": 0.06,
               "status": "ok",
               "error": null,
               "events": [],
@@ -1742,15 +1798,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.349743+00:00",
-              "ended_at": "2026-04-23T20:47:21.350346+00:00",
-              "duration_ms": 0.6,
+              "started_at": "2026-04-23T22:28:52.122998+00:00",
+              "ended_at": "2026-04-23T22:28:52.123551+00:00",
+              "duration_ms": 0.55,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350323+00:00",
+                  "at": "2026-04-23T22:28:52.123530+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -1760,7 +1816,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350326+00:00",
+                  "at": "2026-04-23T22:28:52.123533+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -1770,17 +1826,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350328+00:00",
+                  "at": "2026-04-23T22:28:52.123534+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
-                    "passed": false,
-                    "severity": "error",
-                    "message": "Claim \u20b912000 exceeds per-claim limit \u20b95000"
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Covered \u20b98000.0 within effective per-claim limit \u20b910000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350330+00:00",
+                  "at": "2026-04-23T22:28:52.123536+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -1790,7 +1846,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350332+00:00",
+                  "at": "2026-04-23T22:28:52.123537+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -1800,7 +1856,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350333+00:00",
+                  "at": "2026-04-23T22:28:52.123539+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -1810,17 +1866,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350335+00:00",
+                  "at": "2026-04-23T22:28:52.123540+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": false,
-                    "severity": "error",
-                    "message": "1 excluded item(s) found"
+                    "severity": "partial",
+                    "message": "1 of 2 line item(s) excluded; remainder payable"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.350336+00:00",
+                  "at": "2026-04-23T22:28:52.123542+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -1830,33 +1886,37 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.350339+00:00",
+                  "at": "2026-04-23T22:28:52.123544+00:00",
                   "attrs": {
                     "claimed": 12000.0,
-                    "after_network_discount": 12000.0,
-                    "after_sub_limit": 10000.0,
+                    "after_exclusions": 8000.0,
+                    "after_network_discount": 8000.0,
+                    "after_sub_limit": 8000.0,
                     "copay": 0.0,
-                    "payable": 10000.0,
-                    "is_network": false
+                    "payable": 8000.0,
+                    "is_network": false,
+                    "excluded_items": [
+                      "Teeth Whitening"
+                    ]
                   }
                 }
               ],
               "attrs": {
-                "status": "REJECTED",
-                "payable": 10000.0
+                "status": "PARTIAL",
+                "payable": 8000.0
               }
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.350440+00:00",
-              "ended_at": "2026-04-23T20:47:21.350528+00:00",
-              "duration_ms": 0.09,
+              "started_at": "2026-04-23T22:28:52.123657+00:00",
+              "ended_at": "2026-04-23T22:28:52.123735+00:00",
+              "duration_ms": 0.08,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.350521+00:00",
+                  "at": "2026-04-23T22:28:52.123728+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -1866,7 +1926,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.350523+00:00",
+                  "at": "2026-04-23T22:28:52.123731+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -1876,7 +1936,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.350525+00:00",
+                  "at": "2026-04-23T22:28:52.123732+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -1886,7 +1946,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.350526+00:00",
+                  "at": "2026-04-23T22:28:52.123734+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -1902,14 +1962,14 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.350618+00:00",
-              "ended_at": "2026-04-23T20:47:21.350629+00:00",
+              "started_at": "2026-04-23T22:28:52.123835+00:00",
+              "ended_at": "2026-04-23T22:28:52.123845+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
               "events": [],
               "attrs": {
-                "status": "REJECTED",
+                "status": "PARTIAL",
                 "confidence": 1.0,
                 "stage_errors": 0
               }
@@ -1925,7 +1985,7 @@
       "final": {
         "claim_id": "TC007",
         "status": "REJECTED",
-        "reason": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
+        "reason": "Covered \u20b915000.0 exceeds effective per-claim limit \u20b910000",
         "confidence": 1.0,
         "claim": {
           "claim_id": "TC007",
@@ -2001,7 +2061,7 @@
         "decision": {
           "claim_id": "TC007",
           "status": "REJECTED",
-          "reason": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
+          "reason": "Covered \u20b915000.0 exceeds effective per-claim limit \u20b910000",
           "rules": [
             {
               "code": "CATEGORY_COVERED",
@@ -2024,10 +2084,13 @@
               "code": "PER_CLAIM_LIMIT",
               "passed": false,
               "severity": "error",
-              "message": "Claim \u20b915000 exceeds per-claim limit \u20b95000",
+              "message": "Covered \u20b915000.0 exceeds effective per-claim limit \u20b910000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 15000
+                "per_claim_limit": 5000,
+                "category_sub_limit": 10000,
+                "effective_limit": 10000,
+                "checked": 15000.0,
+                "scope": "covered"
               }
             },
             {
@@ -2070,7 +2133,8 @@
               "severity": "info",
               "message": "No excluded items",
               "evidence": {
-                "hits": []
+                "hits": [],
+                "excluded_descriptions": []
               }
             },
             {
@@ -2085,10 +2149,19 @@
           ],
           "payable": {
             "claimed_amount": 15000.0,
+            "after_exclusions": 15000.0,
             "after_network_discount": 13500.0,
             "after_sub_limit": 10000.0,
             "copay_amount": 0.0,
             "payable": 10000.0,
+            "line_items": [
+              {
+                "description": "MRI Lumbar Spine",
+                "amount": 15000.0,
+                "covered": true,
+                "reason": ""
+              }
+            ],
             "notes": [
               "Applied 10% network discount",
               "Capped at category sub-limit \u20b910000"
@@ -2144,23 +2217,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "8ff0743207a1",
+          "trace_id": "72eb13b77eb9",
           "claim_id": "TC007",
-          "started_at": "2026-04-23T20:47:21.350737+00:00",
-          "ended_at": "2026-04-23T20:47:21.352061+00:00",
-          "duration_ms": 1.32,
+          "started_at": "2026-04-23T22:28:52.123983+00:00",
+          "ended_at": "2026-04-23T22:28:52.125412+00:00",
+          "duration_ms": 1.43,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.350906+00:00",
-              "ended_at": "2026-04-23T20:47:21.350933+00:00",
-              "duration_ms": 0.03,
+              "started_at": "2026-04-23T22:28:52.124170+00:00",
+              "ended_at": "2026-04-23T22:28:52.124195+00:00",
+              "duration_ms": 0.02,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.350917+00:00",
+                  "at": "2026-04-23T22:28:52.124181+00:00",
                   "attrs": {
                     "file_id": "F012",
                     "doc_type": "PRESCRIPTION",
@@ -2169,7 +2242,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.350925+00:00",
+                  "at": "2026-04-23T22:28:52.124187+00:00",
                   "attrs": {
                     "file_id": "F013",
                     "doc_type": "LAB_REPORT",
@@ -2178,7 +2251,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.350931+00:00",
+                  "at": "2026-04-23T22:28:52.124193+00:00",
                   "attrs": {
                     "file_id": "F014",
                     "doc_type": "HOSPITAL_BILL",
@@ -2194,8 +2267,8 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.351034+00:00",
-              "ended_at": "2026-04-23T20:47:21.351097+00:00",
+              "started_at": "2026-04-23T22:28:52.124317+00:00",
+              "ended_at": "2026-04-23T22:28:52.124379+00:00",
               "duration_ms": 0.06,
               "status": "ok",
               "error": null,
@@ -2208,15 +2281,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.351197+00:00",
-              "ended_at": "2026-04-23T20:47:21.351766+00:00",
-              "duration_ms": 0.57,
+              "started_at": "2026-04-23T22:28:52.124499+00:00",
+              "ended_at": "2026-04-23T22:28:52.125034+00:00",
+              "duration_ms": 0.53,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351746+00:00",
+                  "at": "2026-04-23T22:28:52.125012+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -2226,7 +2299,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351749+00:00",
+                  "at": "2026-04-23T22:28:52.125015+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -2236,17 +2309,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351751+00:00",
+                  "at": "2026-04-23T22:28:52.125017+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
                     "passed": false,
                     "severity": "error",
-                    "message": "Claim \u20b915000 exceeds per-claim limit \u20b95000"
+                    "message": "Covered \u20b915000.0 exceeds effective per-claim limit \u20b910000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351752+00:00",
+                  "at": "2026-04-23T22:28:52.125018+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -2256,7 +2329,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351754+00:00",
+                  "at": "2026-04-23T22:28:52.125020+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -2266,7 +2339,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351755+00:00",
+                  "at": "2026-04-23T22:28:52.125022+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": false,
@@ -2276,7 +2349,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351757+00:00",
+                  "at": "2026-04-23T22:28:52.125023+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": true,
@@ -2286,7 +2359,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.351758+00:00",
+                  "at": "2026-04-23T22:28:52.125025+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -2296,14 +2369,16 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.351760+00:00",
+                  "at": "2026-04-23T22:28:52.125027+00:00",
                   "attrs": {
                     "claimed": 15000.0,
+                    "after_exclusions": 15000.0,
                     "after_network_discount": 13500.0,
                     "after_sub_limit": 10000.0,
                     "copay": 0.0,
                     "payable": 10000.0,
-                    "is_network": true
+                    "is_network": true,
+                    "excluded_items": []
                   }
                 }
               ],
@@ -2314,15 +2389,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.351848+00:00",
-              "ended_at": "2026-04-23T20:47:21.351925+00:00",
+              "started_at": "2026-04-23T22:28:52.125149+00:00",
+              "ended_at": "2026-04-23T22:28:52.125234+00:00",
               "duration_ms": 0.08,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.351919+00:00",
+                  "at": "2026-04-23T22:28:52.125226+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -2332,7 +2407,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.351921+00:00",
+                  "at": "2026-04-23T22:28:52.125229+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -2342,7 +2417,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.351922+00:00",
+                  "at": "2026-04-23T22:28:52.125230+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -2352,7 +2427,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.351924+00:00",
+                  "at": "2026-04-23T22:28:52.125232+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -2368,8 +2443,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.352001+00:00",
-              "ended_at": "2026-04-23T20:47:21.352009+00:00",
+              "started_at": "2026-04-23T22:28:52.125341+00:00",
+              "ended_at": "2026-04-23T22:28:52.125351+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -2391,7 +2466,7 @@
       "final": {
         "claim_id": "TC008",
         "status": "REJECTED",
-        "reason": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
+        "reason": "Covered \u20b97500.0 exceeds effective per-claim limit \u20b95000",
         "confidence": 1.0,
         "claim": {
           "claim_id": "TC008",
@@ -2469,7 +2544,7 @@
         "decision": {
           "claim_id": "TC008",
           "status": "REJECTED",
-          "reason": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
+          "reason": "Covered \u20b97500.0 exceeds effective per-claim limit \u20b95000",
           "rules": [
             {
               "code": "CATEGORY_COVERED",
@@ -2492,10 +2567,13 @@
               "code": "PER_CLAIM_LIMIT",
               "passed": false,
               "severity": "error",
-              "message": "Claim \u20b97500 exceeds per-claim limit \u20b95000",
+              "message": "Covered \u20b97500.0 exceeds effective per-claim limit \u20b95000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 7500
+                "per_claim_limit": 5000,
+                "category_sub_limit": 2000,
+                "effective_limit": 5000,
+                "checked": 7500.0,
+                "scope": "covered"
               }
             },
             {
@@ -2534,7 +2612,8 @@
               "severity": "info",
               "message": "No excluded items",
               "evidence": {
-                "hits": []
+                "hits": [],
+                "excluded_descriptions": []
               }
             },
             {
@@ -2549,10 +2628,25 @@
           ],
           "payable": {
             "claimed_amount": 7500.0,
+            "after_exclusions": 7500.0,
             "after_network_discount": 6000.0,
             "after_sub_limit": 2000.0,
             "copay_amount": 200.0,
             "payable": 1800.0,
+            "line_items": [
+              {
+                "description": "Consultation Fee",
+                "amount": 2000.0,
+                "covered": true,
+                "reason": ""
+              },
+              {
+                "description": "Medicines",
+                "amount": 5500.0,
+                "covered": true,
+                "reason": ""
+              }
+            ],
             "notes": [
               "Applied 20% network discount",
               "Capped at category sub-limit \u20b92000",
@@ -2609,23 +2703,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "199a1082895f",
+          "trace_id": "7891c366bfcc",
           "claim_id": "TC008",
-          "started_at": "2026-04-23T20:47:21.352113+00:00",
-          "ended_at": "2026-04-23T20:47:21.353380+00:00",
-          "duration_ms": 1.27,
+          "started_at": "2026-04-23T22:28:52.125490+00:00",
+          "ended_at": "2026-04-23T22:28:52.126882+00:00",
+          "duration_ms": 1.39,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.352270+00:00",
-              "ended_at": "2026-04-23T20:47:21.352291+00:00",
+              "started_at": "2026-04-23T22:28:52.125686+00:00",
+              "ended_at": "2026-04-23T22:28:52.125705+00:00",
               "duration_ms": 0.02,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.352282+00:00",
+                  "at": "2026-04-23T22:28:52.125696+00:00",
                   "attrs": {
                     "file_id": "F015",
                     "doc_type": "PRESCRIPTION",
@@ -2634,7 +2728,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.352289+00:00",
+                  "at": "2026-04-23T22:28:52.125703+00:00",
                   "attrs": {
                     "file_id": "F016",
                     "doc_type": "HOSPITAL_BILL",
@@ -2650,8 +2744,8 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.352389+00:00",
-              "ended_at": "2026-04-23T20:47:21.352450+00:00",
+              "started_at": "2026-04-23T22:28:52.125828+00:00",
+              "ended_at": "2026-04-23T22:28:52.125890+00:00",
               "duration_ms": 0.06,
               "status": "ok",
               "error": null,
@@ -2664,15 +2758,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.352549+00:00",
-              "ended_at": "2026-04-23T20:47:21.353069+00:00",
-              "duration_ms": 0.52,
+              "started_at": "2026-04-23T22:28:52.126012+00:00",
+              "ended_at": "2026-04-23T22:28:52.126545+00:00",
+              "duration_ms": 0.53,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353051+00:00",
+                  "at": "2026-04-23T22:28:52.126526+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -2682,7 +2776,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353053+00:00",
+                  "at": "2026-04-23T22:28:52.126529+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -2692,17 +2786,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353055+00:00",
+                  "at": "2026-04-23T22:28:52.126530+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
                     "passed": false,
                     "severity": "error",
-                    "message": "Claim \u20b97500 exceeds per-claim limit \u20b95000"
+                    "message": "Covered \u20b97500.0 exceeds effective per-claim limit \u20b95000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353056+00:00",
+                  "at": "2026-04-23T22:28:52.126532+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -2712,7 +2806,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353058+00:00",
+                  "at": "2026-04-23T22:28:52.126533+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -2722,7 +2816,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353059+00:00",
+                  "at": "2026-04-23T22:28:52.126535+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -2732,7 +2826,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353061+00:00",
+                  "at": "2026-04-23T22:28:52.126536+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": true,
@@ -2742,7 +2836,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.353062+00:00",
+                  "at": "2026-04-23T22:28:52.126538+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -2752,14 +2846,16 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.353064+00:00",
+                  "at": "2026-04-23T22:28:52.126540+00:00",
                   "attrs": {
                     "claimed": 7500.0,
+                    "after_exclusions": 7500.0,
                     "after_network_discount": 6000.0,
                     "after_sub_limit": 2000.0,
                     "copay": 200.0,
                     "payable": 1800.0,
-                    "is_network": true
+                    "is_network": true,
+                    "excluded_items": []
                   }
                 }
               ],
@@ -2770,15 +2866,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.353149+00:00",
-              "ended_at": "2026-04-23T20:47:21.353226+00:00",
-              "duration_ms": 0.08,
+              "started_at": "2026-04-23T22:28:52.126649+00:00",
+              "ended_at": "2026-04-23T22:28:52.126725+00:00",
+              "duration_ms": 0.07,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.353218+00:00",
+                  "at": "2026-04-23T22:28:52.126719+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -2788,7 +2884,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.353221+00:00",
+                  "at": "2026-04-23T22:28:52.126721+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -2798,7 +2894,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.353222+00:00",
+                  "at": "2026-04-23T22:28:52.126722+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -2808,7 +2904,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.353224+00:00",
+                  "at": "2026-04-23T22:28:52.126724+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -2824,8 +2920,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.353313+00:00",
-              "ended_at": "2026-04-23T20:47:21.353322+00:00",
+              "started_at": "2026-04-23T22:28:52.126821+00:00",
+              "ended_at": "2026-04-23T22:28:52.126830+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -2919,10 +3015,13 @@
               "code": "PER_CLAIM_LIMIT",
               "passed": true,
               "severity": "info",
-              "message": "Claim \u20b94800 within per-claim limit \u20b95000",
+              "message": "Claimed \u20b94800 within effective per-claim limit \u20b95000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 4800
+                "per_claim_limit": 5000,
+                "category_sub_limit": 2000,
+                "effective_limit": 5000,
+                "checked": 4800,
+                "scope": "claimed"
               }
             },
             {
@@ -2961,7 +3060,8 @@
               "severity": "info",
               "message": "No excluded items",
               "evidence": {
-                "hits": []
+                "hits": [],
+                "excluded_descriptions": []
               }
             },
             {
@@ -2976,10 +3076,12 @@
           ],
           "payable": {
             "claimed_amount": 4800.0,
+            "after_exclusions": null,
             "after_network_discount": 3840.0,
             "after_sub_limit": 2000.0,
             "copay_amount": 200.0,
             "payable": 1800.0,
+            "line_items": [],
             "notes": [
               "Applied 20% network discount",
               "Capped at category sub-limit \u20b92000",
@@ -3055,23 +3157,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "f4228da266b0",
+          "trace_id": "bff855447963",
           "claim_id": "TC009",
-          "started_at": "2026-04-23T20:47:21.353435+00:00",
-          "ended_at": "2026-04-23T20:47:21.354810+00:00",
+          "started_at": "2026-04-23T22:28:52.126947+00:00",
+          "ended_at": "2026-04-23T22:28:52.128313+00:00",
           "duration_ms": 1.37,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.353611+00:00",
-              "ended_at": "2026-04-23T20:47:21.353629+00:00",
-              "duration_ms": 0.02,
+              "started_at": "2026-04-23T22:28:52.127126+00:00",
+              "ended_at": "2026-04-23T22:28:52.127141+00:00",
+              "duration_ms": 0.01,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.353621+00:00",
+                  "at": "2026-04-23T22:28:52.127134+00:00",
                   "attrs": {
                     "file_id": "F017",
                     "doc_type": "PRESCRIPTION",
@@ -3080,7 +3182,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.353627+00:00",
+                  "at": "2026-04-23T22:28:52.127139+00:00",
                   "attrs": {
                     "file_id": "F018",
                     "doc_type": "HOSPITAL_BILL",
@@ -3096,9 +3198,9 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.353742+00:00",
-              "ended_at": "2026-04-23T20:47:21.353811+00:00",
-              "duration_ms": 0.07,
+              "started_at": "2026-04-23T22:28:52.127263+00:00",
+              "ended_at": "2026-04-23T22:28:52.127323+00:00",
+              "duration_ms": 0.06,
               "status": "ok",
               "error": null,
               "events": [],
@@ -3110,15 +3212,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.353924+00:00",
-              "ended_at": "2026-04-23T20:47:21.354476+00:00",
-              "duration_ms": 0.55,
+              "started_at": "2026-04-23T22:28:52.127442+00:00",
+              "ended_at": "2026-04-23T22:28:52.127948+00:00",
+              "duration_ms": 0.5,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354457+00:00",
+                  "at": "2026-04-23T22:28:52.127929+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -3128,7 +3230,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354459+00:00",
+                  "at": "2026-04-23T22:28:52.127931+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -3138,17 +3240,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354461+00:00",
+                  "at": "2026-04-23T22:28:52.127933+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
                     "passed": true,
                     "severity": "info",
-                    "message": "Claim \u20b94800 within per-claim limit \u20b95000"
+                    "message": "Claimed \u20b94800 within effective per-claim limit \u20b95000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354462+00:00",
+                  "at": "2026-04-23T22:28:52.127934+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -3158,7 +3260,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354464+00:00",
+                  "at": "2026-04-23T22:28:52.127936+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -3168,7 +3270,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354465+00:00",
+                  "at": "2026-04-23T22:28:52.127937+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -3178,7 +3280,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354467+00:00",
+                  "at": "2026-04-23T22:28:52.127939+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": true,
@@ -3188,7 +3290,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.354468+00:00",
+                  "at": "2026-04-23T22:28:52.127940+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -3198,14 +3300,16 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.354470+00:00",
+                  "at": "2026-04-23T22:28:52.127942+00:00",
                   "attrs": {
                     "claimed": 4800.0,
+                    "after_exclusions": null,
                     "after_network_discount": 3840.0,
                     "after_sub_limit": 2000.0,
                     "copay": 200.0,
                     "payable": 1800.0,
-                    "is_network": true
+                    "is_network": true,
+                    "excluded_items": []
                   }
                 }
               ],
@@ -3216,15 +3320,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.354558+00:00",
-              "ended_at": "2026-04-23T20:47:21.354657+00:00",
+              "started_at": "2026-04-23T22:28:52.128049+00:00",
+              "ended_at": "2026-04-23T22:28:52.128149+00:00",
               "duration_ms": 0.1,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.354650+00:00",
+                  "at": "2026-04-23T22:28:52.128143+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "error",
@@ -3234,7 +3338,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.354652+00:00",
+                  "at": "2026-04-23T22:28:52.128145+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -3244,7 +3348,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.354653+00:00",
+                  "at": "2026-04-23T22:28:52.128146+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -3254,7 +3358,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.354655+00:00",
+                  "at": "2026-04-23T22:28:52.128148+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -3270,8 +3374,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.354732+00:00",
-              "ended_at": "2026-04-23T20:47:21.354747+00:00",
+              "started_at": "2026-04-23T22:28:52.128247+00:00",
+              "ended_at": "2026-04-23T22:28:52.128260+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -3389,10 +3493,13 @@
               "code": "PER_CLAIM_LIMIT",
               "passed": true,
               "severity": "info",
-              "message": "Claim \u20b94500 within per-claim limit \u20b95000",
+              "message": "Covered \u20b94500.0 within effective per-claim limit \u20b95000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 4500
+                "per_claim_limit": 5000,
+                "category_sub_limit": 2000,
+                "effective_limit": 5000,
+                "checked": 4500.0,
+                "scope": "covered"
               }
             },
             {
@@ -3431,7 +3538,8 @@
               "severity": "info",
               "message": "No excluded items",
               "evidence": {
-                "hits": []
+                "hits": [],
+                "excluded_descriptions": []
               }
             },
             {
@@ -3446,10 +3554,25 @@
           ],
           "payable": {
             "claimed_amount": 4500.0,
+            "after_exclusions": 4500.0,
             "after_network_discount": 3600.0,
             "after_sub_limit": 2000.0,
             "copay_amount": 200.0,
             "payable": 1800.0,
+            "line_items": [
+              {
+                "description": "Consultation Fee",
+                "amount": 1500.0,
+                "covered": true,
+                "reason": ""
+              },
+              {
+                "description": "Medicines",
+                "amount": 3000.0,
+                "covered": true,
+                "reason": ""
+              }
+            ],
             "notes": [
               "Applied 20% network discount",
               "Capped at category sub-limit \u20b92000",
@@ -3506,23 +3629,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "2b2da23be675",
+          "trace_id": "b0931475550a",
           "claim_id": "TC010",
-          "started_at": "2026-04-23T20:47:21.354856+00:00",
-          "ended_at": "2026-04-23T20:47:21.356079+00:00",
-          "duration_ms": 1.22,
+          "started_at": "2026-04-23T22:28:52.128376+00:00",
+          "ended_at": "2026-04-23T22:28:52.129775+00:00",
+          "duration_ms": 1.4,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.355010+00:00",
-              "ended_at": "2026-04-23T20:47:21.355030+00:00",
+              "started_at": "2026-04-23T22:28:52.128559+00:00",
+              "ended_at": "2026-04-23T22:28:52.128579+00:00",
               "duration_ms": 0.02,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.355021+00:00",
+                  "at": "2026-04-23T22:28:52.128569+00:00",
                   "attrs": {
                     "file_id": "F019",
                     "doc_type": "PRESCRIPTION",
@@ -3531,7 +3654,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.355028+00:00",
+                  "at": "2026-04-23T22:28:52.128577+00:00",
                   "attrs": {
                     "file_id": "F020",
                     "doc_type": "HOSPITAL_BILL",
@@ -3547,8 +3670,8 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.355127+00:00",
-              "ended_at": "2026-04-23T20:47:21.355187+00:00",
+              "started_at": "2026-04-23T22:28:52.128697+00:00",
+              "ended_at": "2026-04-23T22:28:52.128756+00:00",
               "duration_ms": 0.06,
               "status": "ok",
               "error": null,
@@ -3561,15 +3684,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.355283+00:00",
-              "ended_at": "2026-04-23T20:47:21.355790+00:00",
-              "duration_ms": 0.51,
+              "started_at": "2026-04-23T22:28:52.128872+00:00",
+              "ended_at": "2026-04-23T22:28:52.129423+00:00",
+              "duration_ms": 0.55,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355773+00:00",
+                  "at": "2026-04-23T22:28:52.129402+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -3579,7 +3702,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355775+00:00",
+                  "at": "2026-04-23T22:28:52.129405+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -3589,17 +3712,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355777+00:00",
+                  "at": "2026-04-23T22:28:52.129407+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
                     "passed": true,
                     "severity": "info",
-                    "message": "Claim \u20b94500 within per-claim limit \u20b95000"
+                    "message": "Covered \u20b94500.0 within effective per-claim limit \u20b95000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355778+00:00",
+                  "at": "2026-04-23T22:28:52.129408+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -3609,7 +3732,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355780+00:00",
+                  "at": "2026-04-23T22:28:52.129410+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -3619,7 +3742,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355781+00:00",
+                  "at": "2026-04-23T22:28:52.129412+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -3629,7 +3752,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355783+00:00",
+                  "at": "2026-04-23T22:28:52.129413+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": true,
@@ -3639,7 +3762,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.355784+00:00",
+                  "at": "2026-04-23T22:28:52.129415+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -3649,14 +3772,16 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.355786+00:00",
+                  "at": "2026-04-23T22:28:52.129417+00:00",
                   "attrs": {
                     "claimed": 4500.0,
+                    "after_exclusions": 4500.0,
                     "after_network_discount": 3600.0,
                     "after_sub_limit": 2000.0,
                     "copay": 200.0,
                     "payable": 1800.0,
-                    "is_network": true
+                    "is_network": true,
+                    "excluded_items": []
                   }
                 }
               ],
@@ -3667,15 +3792,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.355870+00:00",
-              "ended_at": "2026-04-23T20:47:21.355945+00:00",
-              "duration_ms": 0.07,
+              "started_at": "2026-04-23T22:28:52.129536+00:00",
+              "ended_at": "2026-04-23T22:28:52.129615+00:00",
+              "duration_ms": 0.08,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.355938+00:00",
+                  "at": "2026-04-23T22:28:52.129609+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -3685,7 +3810,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.355940+00:00",
+                  "at": "2026-04-23T22:28:52.129611+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -3695,7 +3820,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.355942+00:00",
+                  "at": "2026-04-23T22:28:52.129612+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -3705,7 +3830,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.355943+00:00",
+                  "at": "2026-04-23T22:28:52.129614+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -3721,8 +3846,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.356020+00:00",
-              "ended_at": "2026-04-23T20:47:21.356029+00:00",
+              "started_at": "2026-04-23T22:28:52.129712+00:00",
+              "ended_at": "2026-04-23T22:28:52.129722+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -3829,10 +3954,13 @@
               "code": "PER_CLAIM_LIMIT",
               "passed": true,
               "severity": "info",
-              "message": "Claim \u20b94000 within per-claim limit \u20b95000",
+              "message": "Covered \u20b94000.0 within effective per-claim limit \u20b98000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 4000
+                "per_claim_limit": 5000,
+                "category_sub_limit": 8000,
+                "effective_limit": 8000,
+                "checked": 4000.0,
+                "scope": "covered"
               }
             },
             {
@@ -3871,7 +3999,8 @@
               "severity": "info",
               "message": "No excluded items",
               "evidence": {
-                "hits": []
+                "hits": [],
+                "excluded_descriptions": []
               }
             },
             {
@@ -3886,10 +4015,25 @@
           ],
           "payable": {
             "claimed_amount": 4000.0,
+            "after_exclusions": 4000.0,
             "after_network_discount": 4000.0,
             "after_sub_limit": 4000.0,
             "copay_amount": 0.0,
             "payable": 4000.0,
+            "line_items": [
+              {
+                "description": "Panchakarma Therapy (5 sessions)",
+                "amount": 3000.0,
+                "covered": true,
+                "reason": ""
+              },
+              {
+                "description": "Consultation",
+                "amount": 1000.0,
+                "covered": true,
+                "reason": ""
+              }
+            ],
             "notes": []
           },
           "fraud": {
@@ -3951,23 +4095,23 @@
           "Component failure simulated; manual review recommended"
         ],
         "trace": {
-          "trace_id": "8764eb209a45",
+          "trace_id": "f8599ae0c924",
           "claim_id": "TC011",
-          "started_at": "2026-04-23T20:47:21.356124+00:00",
-          "ended_at": "2026-04-23T20:47:21.357416+00:00",
-          "duration_ms": 1.29,
+          "started_at": "2026-04-23T22:28:52.129839+00:00",
+          "ended_at": "2026-04-23T22:28:52.131215+00:00",
+          "duration_ms": 1.38,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.356278+00:00",
-              "ended_at": "2026-04-23T20:47:21.356296+00:00",
+              "started_at": "2026-04-23T22:28:52.130013+00:00",
+              "ended_at": "2026-04-23T22:28:52.130030+00:00",
               "duration_ms": 0.02,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.356287+00:00",
+                  "at": "2026-04-23T22:28:52.130021+00:00",
                   "attrs": {
                     "file_id": "F021",
                     "doc_type": "PRESCRIPTION",
@@ -3976,7 +4120,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.356294+00:00",
+                  "at": "2026-04-23T22:28:52.130028+00:00",
                   "attrs": {
                     "file_id": "F022",
                     "doc_type": "HOSPITAL_BILL",
@@ -3992,8 +4136,8 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.356393+00:00",
-              "ended_at": "2026-04-23T20:47:21.356451+00:00",
+              "started_at": "2026-04-23T22:28:52.130165+00:00",
+              "ended_at": "2026-04-23T22:28:52.130228+00:00",
               "duration_ms": 0.06,
               "status": "ok",
               "error": null,
@@ -4006,15 +4150,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.356549+00:00",
-              "ended_at": "2026-04-23T20:47:21.357091+00:00",
-              "duration_ms": 0.54,
+              "started_at": "2026-04-23T22:28:52.130365+00:00",
+              "ended_at": "2026-04-23T22:28:52.130888+00:00",
+              "duration_ms": 0.52,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357071+00:00",
+                  "at": "2026-04-23T22:28:52.130870+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -4024,7 +4168,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357074+00:00",
+                  "at": "2026-04-23T22:28:52.130872+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -4034,17 +4178,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357076+00:00",
+                  "at": "2026-04-23T22:28:52.130874+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
                     "passed": true,
                     "severity": "info",
-                    "message": "Claim \u20b94000 within per-claim limit \u20b95000"
+                    "message": "Covered \u20b94000.0 within effective per-claim limit \u20b98000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357077+00:00",
+                  "at": "2026-04-23T22:28:52.130875+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -4054,7 +4198,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357079+00:00",
+                  "at": "2026-04-23T22:28:52.130876+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -4064,7 +4208,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357081+00:00",
+                  "at": "2026-04-23T22:28:52.130878+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -4074,7 +4218,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357082+00:00",
+                  "at": "2026-04-23T22:28:52.130879+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": true,
@@ -4084,7 +4228,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.357084+00:00",
+                  "at": "2026-04-23T22:28:52.130881+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -4094,14 +4238,16 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.357086+00:00",
+                  "at": "2026-04-23T22:28:52.130882+00:00",
                   "attrs": {
                     "claimed": 4000.0,
+                    "after_exclusions": 4000.0,
                     "after_network_discount": 4000.0,
                     "after_sub_limit": 4000.0,
                     "copay": 0.0,
                     "payable": 4000.0,
-                    "is_network": false
+                    "is_network": false,
+                    "excluded_items": []
                   }
                 }
               ],
@@ -4112,15 +4258,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.357179+00:00",
-              "ended_at": "2026-04-23T20:47:21.357256+00:00",
-              "duration_ms": 0.08,
+              "started_at": "2026-04-23T22:28:52.130986+00:00",
+              "ended_at": "2026-04-23T22:28:52.131060+00:00",
+              "duration_ms": 0.07,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.357250+00:00",
+                  "at": "2026-04-23T22:28:52.131053+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -4130,7 +4276,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.357252+00:00",
+                  "at": "2026-04-23T22:28:52.131055+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -4140,7 +4286,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.357253+00:00",
+                  "at": "2026-04-23T22:28:52.131057+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -4150,7 +4296,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.357255+00:00",
+                  "at": "2026-04-23T22:28:52.131058+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -4166,8 +4312,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.357346+00:00",
-              "ended_at": "2026-04-23T20:47:21.357360+00:00",
+              "started_at": "2026-04-23T22:28:52.131153+00:00",
+              "ended_at": "2026-04-23T22:28:52.131164+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,
@@ -4189,7 +4335,7 @@
       "final": {
         "claim_id": "TC012",
         "status": "REJECTED",
-        "reason": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+        "reason": "Diagnosis matches policy exclusion: Obesity and weight loss programs",
         "confidence": 1.0,
         "claim": {
           "claim_id": "TC012",
@@ -4251,7 +4397,7 @@
         "decision": {
           "claim_id": "TC012",
           "status": "REJECTED",
-          "reason": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+          "reason": "Diagnosis matches policy exclusion: Obesity and weight loss programs",
           "rules": [
             {
               "code": "CATEGORY_COVERED",
@@ -4272,12 +4418,15 @@
             },
             {
               "code": "PER_CLAIM_LIMIT",
-              "passed": false,
-              "severity": "error",
-              "message": "Claim \u20b98000 exceeds per-claim limit \u20b95000",
+              "passed": true,
+              "severity": "info",
+              "message": "Covered \u20b95000.0 within effective per-claim limit \u20b95000",
               "evidence": {
-                "limit": 5000,
-                "claimed": 8000
+                "per_claim_limit": 5000,
+                "category_sub_limit": 2000,
+                "effective_limit": 5000,
+                "checked": 5000.0,
+                "scope": "covered"
               }
             },
             {
@@ -4314,7 +4463,7 @@
               "code": "EXCLUSIONS",
               "passed": false,
               "severity": "error",
-              "message": "2 excluded item(s) found",
+              "message": "Diagnosis matches policy exclusion: Obesity and weight loss programs",
               "evidence": {
                 "hits": [
                   {
@@ -4325,6 +4474,9 @@
                     "diagnosis": "Morbid Obesity \u2014 BMI 37",
                     "matched": "Obesity and weight loss programs"
                   }
+                ],
+                "excluded_descriptions": [
+                  "Bariatric Consultation"
                 ]
               }
             },
@@ -4340,11 +4492,27 @@
           ],
           "payable": {
             "claimed_amount": 8000.0,
-            "after_network_discount": 6400.0,
+            "after_exclusions": 5000.0,
+            "after_network_discount": 4000.0,
             "after_sub_limit": 2000.0,
             "copay_amount": 200.0,
             "payable": 1800.0,
+            "line_items": [
+              {
+                "description": "Bariatric Consultation",
+                "amount": 3000.0,
+                "covered": false,
+                "reason": "Excluded under policy"
+              },
+              {
+                "description": "Personalised Diet and Nutrition Program",
+                "amount": 5000.0,
+                "covered": true,
+                "reason": ""
+              }
+            ],
             "notes": [
+              "Excluded \u20b93000 across 1 item(s)",
               "Applied 20% network discount",
               "Capped at category sub-limit \u20b92000",
               "Applied 10% copay (\u20b9200.0)"
@@ -4400,23 +4568,23 @@
         "stage_errors": [],
         "notes": [],
         "trace": {
-          "trace_id": "9d880ad8bc56",
+          "trace_id": "f2600803280f",
           "claim_id": "TC012",
-          "started_at": "2026-04-23T20:47:21.357466+00:00",
-          "ended_at": "2026-04-23T20:47:21.358841+00:00",
-          "duration_ms": 1.37,
+          "started_at": "2026-04-23T22:28:52.131276+00:00",
+          "ended_at": "2026-04-23T22:28:52.132706+00:00",
+          "duration_ms": 1.43,
           "spans": [
             {
               "stage": "parse",
-              "started_at": "2026-04-23T20:47:21.357641+00:00",
-              "ended_at": "2026-04-23T20:47:21.357660+00:00",
+              "started_at": "2026-04-23T22:28:52.131455+00:00",
+              "ended_at": "2026-04-23T22:28:52.131472+00:00",
               "duration_ms": 0.02,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.357651+00:00",
+                  "at": "2026-04-23T22:28:52.131463+00:00",
                   "attrs": {
                     "file_id": "F023",
                     "doc_type": "PRESCRIPTION",
@@ -4425,7 +4593,7 @@
                 },
                 {
                   "name": "doc_parsed",
-                  "at": "2026-04-23T20:47:21.357658+00:00",
+                  "at": "2026-04-23T22:28:52.131470+00:00",
                   "attrs": {
                     "file_id": "F024",
                     "doc_type": "HOSPITAL_BILL",
@@ -4441,8 +4609,8 @@
             },
             {
               "stage": "assemble",
-              "started_at": "2026-04-23T20:47:21.357768+00:00",
-              "ended_at": "2026-04-23T20:47:21.357833+00:00",
+              "started_at": "2026-04-23T22:28:52.131593+00:00",
+              "ended_at": "2026-04-23T22:28:52.131652+00:00",
               "duration_ms": 0.06,
               "status": "ok",
               "error": null,
@@ -4455,15 +4623,15 @@
             },
             {
               "stage": "rules",
-              "started_at": "2026-04-23T20:47:21.357942+00:00",
-              "ended_at": "2026-04-23T20:47:21.358519+00:00",
-              "duration_ms": 0.58,
+              "started_at": "2026-04-23T22:28:52.131771+00:00",
+              "ended_at": "2026-04-23T22:28:52.132369+00:00",
+              "duration_ms": 0.6,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358499+00:00",
+                  "at": "2026-04-23T22:28:52.132350+00:00",
                   "attrs": {
                     "code": "CATEGORY_COVERED",
                     "passed": true,
@@ -4473,7 +4641,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358502+00:00",
+                  "at": "2026-04-23T22:28:52.132352+00:00",
                   "attrs": {
                     "code": "MINIMUM_AMOUNT",
                     "passed": true,
@@ -4483,17 +4651,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358503+00:00",
+                  "at": "2026-04-23T22:28:52.132354+00:00",
                   "attrs": {
                     "code": "PER_CLAIM_LIMIT",
-                    "passed": false,
-                    "severity": "error",
-                    "message": "Claim \u20b98000 exceeds per-claim limit \u20b95000"
+                    "passed": true,
+                    "severity": "info",
+                    "message": "Covered \u20b95000.0 within effective per-claim limit \u20b95000"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358505+00:00",
+                  "at": "2026-04-23T22:28:52.132356+00:00",
                   "attrs": {
                     "code": "SUBMISSION_DEADLINE",
                     "passed": true,
@@ -4503,7 +4671,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358507+00:00",
+                  "at": "2026-04-23T22:28:52.132357+00:00",
                   "attrs": {
                     "code": "WAITING_PERIOD",
                     "passed": true,
@@ -4513,7 +4681,7 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358508+00:00",
+                  "at": "2026-04-23T22:28:52.132358+00:00",
                   "attrs": {
                     "code": "PRE_AUTH",
                     "passed": true,
@@ -4523,17 +4691,17 @@
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358510+00:00",
+                  "at": "2026-04-23T22:28:52.132360+00:00",
                   "attrs": {
                     "code": "EXCLUSIONS",
                     "passed": false,
                     "severity": "error",
-                    "message": "2 excluded item(s) found"
+                    "message": "Diagnosis matches policy exclusion: Obesity and weight loss programs"
                   }
                 },
                 {
                   "name": "rule_eval",
-                  "at": "2026-04-23T20:47:21.358511+00:00",
+                  "at": "2026-04-23T22:28:52.132361+00:00",
                   "attrs": {
                     "code": "NETWORK_HOSPITAL",
                     "passed": true,
@@ -4543,14 +4711,18 @@
                 },
                 {
                   "name": "payable_computed",
-                  "at": "2026-04-23T20:47:21.358513+00:00",
+                  "at": "2026-04-23T22:28:52.132363+00:00",
                   "attrs": {
                     "claimed": 8000.0,
-                    "after_network_discount": 6400.0,
+                    "after_exclusions": 5000.0,
+                    "after_network_discount": 4000.0,
                     "after_sub_limit": 2000.0,
                     "copay": 200.0,
                     "payable": 1800.0,
-                    "is_network": true
+                    "is_network": true,
+                    "excluded_items": [
+                      "Bariatric Consultation"
+                    ]
                   }
                 }
               ],
@@ -4561,15 +4733,15 @@
             },
             {
               "stage": "fraud",
-              "started_at": "2026-04-23T20:47:21.358608+00:00",
-              "ended_at": "2026-04-23T20:47:21.358693+00:00",
+              "started_at": "2026-04-23T22:28:52.132469+00:00",
+              "ended_at": "2026-04-23T22:28:52.132546+00:00",
               "duration_ms": 0.08,
               "status": "ok",
               "error": null,
               "events": [
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.358685+00:00",
+                  "at": "2026-04-23T22:28:52.132540+00:00",
                   "attrs": {
                     "code": "SAME_DAY_CLAIMS",
                     "severity": "info",
@@ -4579,7 +4751,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.358687+00:00",
+                  "at": "2026-04-23T22:28:52.132542+00:00",
                   "attrs": {
                     "code": "MONTHLY_CLAIMS",
                     "severity": "info",
@@ -4589,7 +4761,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.358689+00:00",
+                  "at": "2026-04-23T22:28:52.132543+00:00",
                   "attrs": {
                     "code": "HIGH_VALUE_AUTO_REVIEW",
                     "severity": "info",
@@ -4599,7 +4771,7 @@
                 },
                 {
                   "name": "fraud_signal",
-                  "at": "2026-04-23T20:47:21.358691+00:00",
+                  "at": "2026-04-23T22:28:52.132545+00:00",
                   "attrs": {
                     "code": "DUPLICATE_CLAIM",
                     "severity": "info",
@@ -4615,8 +4787,8 @@
             },
             {
               "stage": "finalize",
-              "started_at": "2026-04-23T20:47:21.358777+00:00",
-              "ended_at": "2026-04-23T20:47:21.358786+00:00",
+              "started_at": "2026-04-23T22:28:52.132644+00:00",
+              "ended_at": "2026-04-23T22:28:52.132652+00:00",
               "duration_ms": 0.01,
               "status": "ok",
               "error": null,

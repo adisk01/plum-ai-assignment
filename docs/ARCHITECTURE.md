@@ -37,9 +37,11 @@ The happy path runs all five stages. A single `Tracer` is attached via thread-lo
 
 ### `rules_engine` — policy checks + financial calculation
 - Eight rule checks, all in `rules.py`: category covered, min amount, per-claim limit, submission deadline, waiting period, pre-authorization, exclusions, network hospital
-- `financials.py` computes `PayableBreakdown` in this order: **network discount → sub-limit → copay**
+- Exclusions run **first** so its evidence (`excluded_descriptions`) feeds both the per-claim-limit check (uses `covered_amount` = sum of non-excluded line items) and the financial calc. A mixed bill returns `severity="partial"`; all-excluded or diagnosis-level exclusions stay `severity="error"`.
+- `financials.py` computes `PayableBreakdown` in this order: **per-item exclusion filter → network discount → sub-limit → copay**. Every line item is returned as `LineItemDecision(covered, reason)` so the UI can render a per-item table.
+- Per-claim-limit uses `max(coverage.per_claim_limit, category.sub_limit)` as the effective cap — so DENTAL (sub-limit ₹10k) can accept a ₹8k covered subtotal while CONSULT (sub-limit ₹2k) still trips the ₹5k generic cap.
 - `evaluate.py` (used by the non-graph pipeline) combines rules + fraud into a `Decision`
-- Status precedence: any error → `REJECTED`; otherwise fraud-manual-review wins; otherwise any warning → `NEEDS_REVIEW`; otherwise `APPROVED`
+- Status precedence: any error → `REJECTED`; otherwise fraud-manual-review wins; otherwise any partial → `PARTIAL`; otherwise any warning → `NEEDS_REVIEW`; otherwise `APPROVED`
 
 ### `fraud_detector` — anomaly signals
 - Four signals: same-day claim burst, monthly claim volume, high-value auto-review, duplicate claim (same date+amount)
@@ -61,6 +63,11 @@ The happy path runs all five stages. A single `Tracer` is attached via thread-lo
 - Two dispatchers: `call_text` (prefers Groq for speed), `call_vision` (prefers Anthropic for stronger vision)
 - Every call is wrapped in `_traced(...)` which records provider/model/kind, latency, token usage, error string (if any)
 - All three support structured outputs via Pydantic → JSON schema (OpenAI/Groq use `response_format=json_schema`, Anthropic gets schema in prompt text)
+- Decorated with `@langsmith.traceable(run_type="llm")` — no-op unless `LANGSMITH_TRACING=true` is set; when on, every LLM call appears in LangSmith alongside the wrapping graph node
+
+### `scripts/ui.py` — Gradio UI
+- Thin wrapper over `run_graph`: pick a test case (or paste claim JSON), hit Run, see status + payable breakdown + per-line-item table + all rules + fraud signals + stage errors + full audit trace + raw `FinalDecision` JSON
+- Uses the exact same entry point as the CLI and the eval harness — no UI-specific logic in the pipeline
 
 ### `core/config.py`
 - Loads `.env` and `policy_terms.json`
@@ -101,8 +108,6 @@ Today this is a single-process synchronous pipeline. At 10x scale:
 
 ## Limitations (honest list)
 
-- **TC006 — partial approval of mixed line items.** The rules engine currently treats a bill containing one excluded line item (teeth whitening) as `REJECTED` for the whole claim. The brief expects `PARTIAL` with the covered portion paid. Would need to split `PayableBreakdown` across line items and mark excluded items explicitly. Tracked in the eval report.
-- **No UI.** Assignment asks for one; not built yet. A thin Gradio app over `run_graph` is the obvious next step.
 - **OCR for real scans.** Vision LLMs handle clean phone photos well; rubber-stamped handwritten prescriptions from tier-3 clinics would need a dedicated OCR pre-pass. Not implemented.
-- **No eval regression harness in CI.** The eval runs locally via `scripts/run_evals.py`. For production, the 11/12 match rate becomes a CI gate.
+- **No eval regression harness in CI.** The eval runs locally via `scripts/run_evals.py`. For production, the 12/12 match rate becomes a CI gate.
 - **Fraud history is synthetic.** We read `claims_history` off the input; at scale this is a database query. Contract-wise this is just a dependency injection change in `detect_fraud`.

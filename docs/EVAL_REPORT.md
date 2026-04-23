@@ -1,6 +1,6 @@
 # Eval Report
 
-**Result: 11/12 official test cases match expected outcomes.**
+**Result: 12/12 official test cases match expected outcomes.**
 
 Run locally with `python scripts/run_evals.py`. Full per-case traces, rule evaluations, fraud signals, and stage timings live in [`evals/report.md`](../evals/report.md) and [`evals/report.json`](../evals/report.json).
 
@@ -13,7 +13,7 @@ Run locally with `python scripts/run_evals.py`. Full per-case traces, rule evalu
 | TC003 | Patient name mismatch across documents | REJECTED¹ | REJECTED | ✓ |
 | TC004 | Valid consultation, all docs present | APPROVED | APPROVED | ✓ |
 | TC005 | Diabetes claim within 90-day waiting period | REJECTED | REJECTED | ✓ |
-| TC006 | Bill mixing covered (root canal) and excluded (teeth whitening) items | PARTIAL | REJECTED | **✗** |
+| TC006 | Bill mixing covered (root canal) and excluded (teeth whitening) items | PARTIAL | PARTIAL (₹8000) | ✓ |
 | TC007 | MRI without pre-authorization | REJECTED | REJECTED | ✓ |
 | TC008 | Amount exceeds per-claim limit | REJECTED | REJECTED | ✓ |
 | TC009 | Same-day burst (4 claims today) | MANUAL_REVIEW | MANUAL_REVIEW | ✓ |
@@ -23,17 +23,16 @@ Run locally with `python scripts/run_evals.py`. Full per-case traces, rule evalu
 
 ¹ The brief doesn't list a strict expected status for TC001-003; the intent is clearly "don't let this through". Our system rejects with specific error messages; we record the system's reasoning in the trace rather than claiming a mismatch.
 
-## The one that didn't match: TC006
+## TC006 — PARTIAL approval (mixed bill)
 
-**What we got:** `REJECTED` — "Claim ₹12000 exceeds per-claim limit ₹5000"
-**What was expected:** `PARTIAL` — pay the covered portion (root canal) and decline the teeth-whitening line
+DENTAL claim totalling ₹12,000: Root Canal (₹8,000, covered) + Teeth Whitening (₹4,000, cosmetic – excluded). We produce `PARTIAL` with payable ₹8,000.
 
-**Why it fails:** Two independent issues, the first of which we hit first:
+**Design:**
 
-1. The **per-claim limit** rule runs against the whole claimed amount (₹12,000), trips the ₹5,000 cap, and returns a blocking error. We short-circuit to `REJECTED` before getting to the exclusion logic. Even if we didn't, the exclusion rule today rejects the whole claim if any line item is excluded.
-2. To produce `PARTIAL` correctly we'd need `PayableBreakdown` to operate line-by-line — pay covered items up to policy limits, drop excluded items, emit a `partial_paid` status.
-
-**Why we haven't fixed it:** Partial-approval is a meaningful feature change (line-item-level financials, a new decision path, UI affordance for per-item approval). The assignment note is explicit: *"make conscious trade-offs and document them — your judgment about what to cut is part of what we are evaluating."* Cutting partial-approval to get the rest of the system right felt correct. We have a clean place to add it (`financials.compute_payable` takes line items, loops with current network/sublimit/copay math per item, aggregates).
+1. **`check_exclusions` runs first** and emits `evidence.excluded_descriptions` — the per-item list flagged against `policy.exclusions.conditions` and category-level `excluded_procedures`. A mixed bill (some items excluded, others covered) returns `severity="partial"`; an all-excluded bill or diagnosis-level exclusion stays `severity="error"`.
+2. **`check_per_claim_limit` takes `covered_amount`** — the sum of line items after the exclusion filter. The effective cap is `max(coverage.per_claim_limit, category.sub_limit)` so DENTAL's ₹10,000 sub-limit wins over the generic ₹5,000 cap, but CONSULT (sub-limit ₹2,000) still trips the ₹5,000 generic cap in TC008.
+3. **`financials.compute_payable` itemises** each line with `LineItemDecision(covered: bool, reason: str)`, drops excluded ones, then applies network discount → sub-limit → copay to the covered subtotal. `PayableBreakdown.line_items` is returned on the decision so the UI can render a per-item table.
+4. **The finalizer maps `severity="partial"` → `DecisionStatus.PARTIAL`**, blocked only by `severity="error"` rules. Fraud review still overrides to `MANUAL_REVIEW` when warranted.
 
 ## Per-case highlights
 
@@ -46,6 +45,10 @@ The full per-case detail is in `evals/report.md`. Some specific traces worth cal
 **TC010 — network discount ordering.** Trace `payable_computed` event: `claimed=6000, after_network_discount=4800, after_sub_limit=2500, copay=500, payable=1800, is_network=true`. Three steps, all visible, in the documented order.
 
 **TC011 — graceful degradation.** Confidence drops from 1.0 to 0.7 (one synthetic `StageError` × 0.3). Status is still `APPROVED`; ops reviewers see the low confidence and can pull up the trace which shows the `simulated` stage error. Pipeline never crashed.
+
+## UI
+
+`scripts/ui.py` launches a Gradio app over `run_graph`. A reviewer can pick any of the 12 test cases (or paste their own JSON), run the pipeline, and inspect the status, payable breakdown with per-line-item table, all rule evaluations, fraud signals, stage errors, and the full per-span audit trace.
 
 ## Latency
 

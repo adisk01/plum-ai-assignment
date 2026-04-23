@@ -69,20 +69,22 @@ All return `RuleResult(code, passed, severity, message, evidence)`. `severity` i
 |---|---|---|
 | `check_category_covered(category)` | claim category | error — category not in policy |
 | `check_minimum_amount(amount)` | claimed amount | warning — under floor |
-| `check_per_claim_limit(amount)` | claimed amount | **error** — over per-claim limit |
+| `check_per_claim_limit(amount, category, covered_amount)` | claimed or covered amount + category | **error** — over `max(per_claim_limit, category.sub_limit)` |
 | `check_submission_deadline(treatment_date, submission_date)` | ISO dates | warning — submitted after window |
 | `check_waiting_period(join_date, treatment_date, diagnosis)` | dates + diagnosis string | error — condition still in waiting period |
 | `check_pre_auth(category, amount, text, provided)` | category, amount, concatenated doc text, flag | error — pre-auth required but not provided |
-| `check_exclusions(category, line_items, diagnosis)` | category, bill line items, diagnosis | error — exclusion keyword matched |
+| `check_exclusions(category, line_items, diagnosis)` | category, bill line items, diagnosis | error — diagnosis excluded or all items excluded; **partial** — some items excluded; passes with `evidence.excluded_descriptions` |
 | `check_network_hospital(name)` | hospital name | info — always passes; sets `evidence.in_network` |
 
 ---
 
 ## `rules_engine.financials`
 
-### `compute_payable(claimed_amount: float, category: str, is_network: bool) -> PayableBreakdown`
+### `compute_payable(claimed_amount, category, is_network, line_items=None, excluded_descriptions=None) -> PayableBreakdown`
 
-Applies **network discount → sub-limit → copay** in that order. Returns `PayableBreakdown(claimed_amount, after_network_discount, after_sub_limit, copay_amount, payable, notes)`. Never raises on valid inputs; returns `payable=0` for unknown categories.
+Applies **per-item exclusion filter → network discount → sub-limit → copay** in that order. When `line_items` is supplied, each item is itemised into `LineItemDecision(description, amount, covered, reason)` and excluded items are dropped before network/sub-limit/copay math runs on the covered subtotal.
+
+Returns `PayableBreakdown(claimed_amount, after_exclusions, after_network_discount, after_sub_limit, copay_amount, payable, line_items, notes)`. Never raises on valid inputs; returns `payable=0` for unknown categories.
 
 ---
 
@@ -93,7 +95,7 @@ Applies **network discount → sub-limit → copay** in that order. Returns `Pay
 - Short-circuits with `REJECTED` if `claim.has_errors()`
 - Runs all rule checks, computes payable, runs fraud detection
 - Returns `Decision(claim_id, status, reason, rules, payable, fraud)`
-- Status precedence: error → `REJECTED`; fraud.needs_manual_review + no error → `MANUAL_REVIEW`; warning → `NEEDS_REVIEW`; else `APPROVED`
+- Status precedence: error → `REJECTED`; fraud.needs_manual_review + no error → `MANUAL_REVIEW`; partial → `PARTIAL`; warning → `NEEDS_REVIEW`; else `APPROVED`
 - **Raises** — never; failures surface as failed `RuleResult`s or come out through the orchestrator's `StageError` wrapper
 
 ---
