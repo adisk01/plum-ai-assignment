@@ -1,54 +1,33 @@
-"""CLI: parse a single document end-to-end and print the ParsedDocument JSON.
+"""CLI: parse a single document and print the ParsedDocument JSON.
 
 Usage:
     python scripts/parse_one.py path/to/bill.pdf
-    python scripts/parse_one.py path/to/rx.jpg --expected PRESCRIPTION
-    python scripts/parse_one.py path/to/bill.pdf --file-id F008 --pretty
-
-Requires an API key for whichever provider will be used. See .env.example.
+    python scripts/parse_one.py path/to/rx.jpg --expected PRESCRIPTION --pretty
 """
-
-from __future__ import annotations
 
 import argparse
 import json
 import sys
 from pathlib import Path
 
-# Allow running the script directly without `pip install -e .`
-_HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(_HERE.parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from claims_processor.core import config  # noqa: E402
-from claims_processor.document_extractor import parse  # noqa: E402
-from claims_processor.document_extractor.exceptions import (  # noqa: E402
-    DocumentExtractorError,
-)
-from claims_processor.models.documents import DocType  # noqa: E402
+from claims_processor.core import config
+from claims_processor.document_extractor import parse
+from claims_processor.document_extractor.exceptions import DocumentExtractorError
+from claims_processor.models.documents import DocType
 
 
-def _parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Parse a single claim document.")
-    p.add_argument("file", help="Path to a PDF / JPG / PNG document")
-    p.add_argument(
-        "--expected",
-        help=f"Expected doc type. One of: {[t.value for t in DocType]}",
-        default=None,
-    )
-    p.add_argument("--file-id", default="F000", help="Synthetic file_id for the output")
-    p.add_argument("--pretty", action="store_true", help="Pretty-print JSON")
-    return p.parse_args()
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("file")
+    ap.add_argument("--expected", default=None)
+    ap.add_argument("--file-id", default="F000")
+    ap.add_argument("--pretty", action="store_true")
+    args = ap.parse_args()
 
-
-def main() -> int:
-    args = _parse_args()
     config.load_env()
-
     path = Path(args.file)
-    if not path.exists():
-        print(f"error: file not found: {path}", file=sys.stderr)
-        return 2
-
     expected = DocType(args.expected.upper()) if args.expected else None
 
     try:
@@ -59,16 +38,11 @@ def main() -> int:
             expected_type=expected,
         )
     except DocumentExtractorError as e:
-        print(
-            json.dumps(
-                {"error": type(e).__name__, "message": str(e)},
-                indent=2 if args.pretty else None,
-            )
-        )
+        print(json.dumps({"error": type(e).__name__, "message": str(e)}))
         return 1
 
-    payload = parsed.model_dump(mode="json")
-    print(json.dumps(payload, indent=2 if args.pretty else None, default=str))
+    indent = 2 if args.pretty else None
+    print(json.dumps(parsed.model_dump(mode="json"), indent=indent, default=str))
     return 0
 
 

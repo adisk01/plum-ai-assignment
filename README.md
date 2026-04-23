@@ -88,12 +88,10 @@ Entry point: `claims_processor.document_extractor.parse.parse_document`.
 Flow:
 1. Validate extension → `UnsupportedFileTypeError`
 2. Text-native PDFs use pypdfium2 text; scanned PDFs and images go through a vision LLM
-3. Classify into one of 7 medical doc types (or UNKNOWN → `DocumentClassificationError`)
+3. Classify into one of 7 medical doc types (the Pydantic `ClassifierResponse` schema is passed to the LLM as `response_format`)
 4. Enforce expected type (TC001 → `WrongDocumentTypeError`)
 5. Enforce readability (TC002 → `UnreadableDocumentError`)
-6. Extract typed fields via Pydantic schema + per-field confidence
-7. For `HOSPITAL_BILL` PDFs: augment missing `line_items` via pdfplumber tables
-8. Compute `overall_confidence` blending field-level + classifier + readability
+6. Extract typed fields by passing the per-doc-type Pydantic schema to the LLM adapter
 
 Supported doc types: `PRESCRIPTION, HOSPITAL_BILL, PHARMACY_BILL, LAB_REPORT, DIAGNOSTIC_REPORT, DENTAL_REPORT, DISCHARGE_SUMMARY`.
 

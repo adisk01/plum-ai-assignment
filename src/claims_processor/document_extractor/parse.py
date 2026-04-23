@@ -1,7 +1,4 @@
-"""Public entry point for the document extractor layer.
-
-Usage:
-    from claims_processor.document_extractor.parse import parse_document
+"""Entry point for the document extractor.
 
     parsed = parse_document(
         file_bytes=open("bill.pdf", "rb").read(),
@@ -9,134 +6,67 @@ Usage:
         file_id="F001",
         expected_type=DocType.HOSPITAL_BILL,
     )
-
-Flow:
-  1. Validate extension  → UnsupportedFileTypeError
-  2. PDF: extract pages; Image: hold bytes as-is
-  3. Classify            → DocumentClassificationError if UNKNOWN
-  4. If expected_type set and actual != expected → WrongDocumentTypeError (TC001)
-  5. If classifier says unreadable               → UnreadableDocumentError (TC002)
-  6. Extract fields with the correct schema      → ParsedDocument
 """
 
-from __future__ import annotations
-
-from claims_processor.document_extractor import classifier as cls
-from claims_processor.document_extractor import extractor as ext
-from claims_processor.document_extractor import image_utils as iu
-from claims_processor.document_extractor import pdf_utils
+from claims_processor.document_extractor import classifier, extractor, pdf_utils
 from claims_processor.document_extractor.exceptions import (
-    DocumentClassificationError,
     UnreadableDocumentError,
     UnsupportedFileTypeError,
     WrongDocumentTypeError,
 )
-from claims_processor.models.documents import DocType, HospitalBill, ParsedDocument
+from claims_processor.models.documents import DocType, ParsedDocument, SCHEMA_FOR_DOC_TYPE
 
 
-# Pass pre-extracted dict content through these known test cases without
-# invoking an LLM. Used by the eval harness (test_cases.json).
-def parse_from_dict(
-    file_id: str,
-    doc_type: DocType,
-    content: dict,
-    expected_type: DocType | None = None,
-) -> ParsedDocument:
-    """Build a ParsedDocument from already-structured content (eval path)."""
-    if expected_type and doc_type != expected_type:
-        raise WrongDocumentTypeError(
-            file_id=file_id, expected=expected_type.value, got=doc_type.value
-        )
-    from claims_processor.models.documents import SCHEMA_FOR_DOC_TYPE
-
-    schema = SCHEMA_FOR_DOC_TYPE[doc_type]
-    body = schema(**{k: v for k, v in content.items() if k in schema.model_fields})
-    return ext.build_parsed_document(
-        file_id=file_id,
-        doc_type=doc_type,
-        body=body,
-        field_confidence={},
-        classifier_confidence=1.0,
-        readable=True,
-    )
+SUPPORTED_EXTS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 
-def parse_document(
-    file_bytes: bytes,
-    file_ext: str,
-    file_id: str,
-    expected_type: DocType | None = None,
-) -> ParsedDocument:
-    """End-to-end extraction for one uploaded document."""
-    ext_norm = iu.normalize_ext(file_ext)
-    if not iu.is_supported_ext(ext_norm):
-        raise UnsupportedFileTypeError(ext_norm)
+def parse_document(file_bytes, file_ext, file_id, expected_type=None):
+    ext = file_ext.lower()
+    if not ext.startswith("."):
+        ext = "." + ext
+    if ext not in SUPPORTED_EXTS:
+        raise UnsupportedFileTypeError(ext)
 
-    warnings: list[str] = []
-    raw_text_preview: str | None = None
-
-    # Step 1 — get text (PDF) or prepare bytes (image)
+    # Use text path for text-native PDFs, vision otherwise
+    text = ""
     use_vision = True
-    pdf_text = ""
-    if iu.is_pdf_ext(ext_norm):
+    if ext == ".pdf":
         pages = pdf_utils.extract_pages_from_pdf_bytes(file_bytes)
-        if pdf_utils.is_text_native_pdf(pages):
-            pdf_text = pdf_utils.concat_pages(pages)
-            raw_text_preview = pdf_text[:500]
+        text = "\n\n".join(p.text for p in pages if p.text)
+        if len(text) >= 50:
             use_vision = False
 
-    # Step 2 — classify
     if use_vision:
-        class_result = cls.classify_from_image(file_bytes, ext_norm)
+        cls = classifier.classify_from_image(file_bytes, ext)
     else:
-        class_result = cls.classify_from_text(pdf_text)
+        cls = classifier.classify_from_text(text)
 
-    doc_type: DocType = class_result["doc_type"]
-    readable: bool = class_result["readable"]
-    classifier_conf: float = class_result["confidence"]
+    if cls.doc_type == DocType.UNKNOWN:
+        raise UnreadableDocumentError(file_id, cls.reason or "could not classify")
 
-    if doc_type == DocType.UNKNOWN:
-        raise DocumentClassificationError(
-            file_id=file_id,
-            reason=class_result.get("reason") or "document did not match any known type",
-        )
+    if expected_type and cls.doc_type != expected_type:
+        raise WrongDocumentTypeError(file_id, expected_type.value, cls.doc_type.value)
 
-    # Step 3 — wrong-type gate (TC001)
-    if expected_type and doc_type != expected_type:
-        raise WrongDocumentTypeError(
-            file_id=file_id,
-            expected=expected_type.value,
-            got=doc_type.value,
-        )
+    if not cls.readable:
+        raise UnreadableDocumentError(file_id, cls.reason or "document unreadable")
 
-    # Step 4 — readability gate (TC002)
-    if not readable:
-        raise UnreadableDocumentError(
-            file_id=file_id,
-            reason=class_result.get("reason") or "document appears unreadable",
-        )
-
-    # Step 5 — extract fields
     if use_vision:
-        body, field_confidence = ext.extract_from_image(doc_type, file_bytes, ext_norm)
+        body = extractor.extract_from_image(cls.doc_type, file_bytes, ext)
     else:
-        body, field_confidence = ext.extract_from_text(doc_type, pdf_text)
+        body = extractor.extract_from_text(cls.doc_type, text)
 
-    # Step 6 — augment hospital bill line items from pdfplumber when empty
-    if (
-        doc_type == DocType.HOSPITAL_BILL
-        and iu.is_pdf_ext(ext_norm)
-        and isinstance(body, HospitalBill)
-    ):
-        body = ext.augment_bill_with_pdf_tables(body, file_bytes)
-
-    return ext.build_parsed_document(
+    return ParsedDocument(
         file_id=file_id,
-        doc_type=doc_type,
-        body=body,
-        field_confidence=field_confidence,
-        classifier_confidence=classifier_conf,
-        readable=readable,
-        warnings=warnings,
-        raw_text_preview=raw_text_preview,
+        doc_type=cls.doc_type,
+        extracted=body,
+        confidence=cls.confidence,
     )
+
+
+def parse_from_dict(file_id, doc_type, content, expected_type=None):
+    """Build a ParsedDocument from pre-extracted content (for test_cases.json)."""
+    if expected_type and doc_type != expected_type:
+        raise WrongDocumentTypeError(file_id, expected_type.value, doc_type.value)
+    schema = SCHEMA_FOR_DOC_TYPE[doc_type]
+    body = schema(**{k: v for k, v in content.items() if k in schema.model_fields})
+    return ParsedDocument(file_id=file_id, doc_type=doc_type, extracted=body, confidence=1.0)
