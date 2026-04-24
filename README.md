@@ -12,13 +12,34 @@ See [`PROBLEM_STATEMENT/assignment.md`](PROBLEM_STATEMENT/assignment.md) for the
 
 ## Pipeline
 
-```
-parse → assemble → rules → fraud → finalize
-  │         │
-  └─ NEEDS_REUPLOAD   └─ REJECTED (consistency errors)
+```mermaid
+graph TD;
+    __start__([<p>__start__</p>]):::first
+    parse(parse)
+    assemble(assemble)
+    rules(rules)
+    fraud(fraud)
+    finalize(finalize)
+    __end__([<p>__end__</p>]):::last
+    __start__ --> parse;
+    assemble -.-> finalize;
+    assemble -.-> rules;
+    fraud --> finalize;
+    parse -.-> assemble;
+    parse -.-> finalize;
+    rules --> fraud;
+    finalize --> __end__;
+    classDef default fill:#f2f0ff,line-height:1.2
+    classDef first fill-opacity:0
+    classDef last fill:#bfb6fc
 ```
 
-Five LangGraph nodes with two conditional short-circuits. A thread-local `Tracer` records a span per stage and events for every LLM call, rule evaluation, fraud signal, and payable computation — attached to `FinalDecision.trace`.
+Five LangGraph nodes with two conditional short-circuits (dashed edges):
+
+- **After `parse`** — wrong-type / unreadable document → `finalize` with `NEEDS_REUPLOAD`
+- **After `assemble`** — consistency errors → `finalize` with `REJECTED`
+
+A thread-local `Tracer` records a span per stage and events for every LLM call, rule evaluation, fraud signal, and payable computation — attached to `FinalDecision.trace`. Regenerate the diagram any time with `python scripts/run_graph.py --mermaid`.
 
 ## Quickstart
 

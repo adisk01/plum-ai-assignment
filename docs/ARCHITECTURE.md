@@ -14,6 +14,30 @@ Takes a claim submission (member details, treatment category, amount, and one or
                   └───────── NEEDS_REUPLOAD ──────┴────────────── REJECTED (via finalize)
 ```
 
+Rendered directly from the compiled LangGraph (`python scripts/run_graph.py --mermaid`):
+
+```mermaid
+graph TD;
+    __start__([<p>__start__</p>]):::first
+    parse(parse)
+    assemble(assemble)
+    rules(rules)
+    fraud(fraud)
+    finalize(finalize)
+    __end__([<p>__end__</p>]):::last
+    __start__ --> parse;
+    assemble -.-> finalize;
+    assemble -.-> rules;
+    fraud --> finalize;
+    parse -.-> assemble;
+    parse -.-> finalize;
+    rules --> fraud;
+    finalize --> __end__;
+    classDef default fill:#f2f0ff,line-height:1.2
+    classDef first fill-opacity:0
+    classDef last fill:#bfb6fc
+```
+
 All five stages are LangGraph nodes. Two conditional routers short-circuit to `finalize` early:
 
 1. **After parse** — if any document is the wrong type (e.g. prescription where bill is required) or is unreadable, the graph jumps to `finalize` and returns `NEEDS_REUPLOAD` with a specific error message. This is assignment requirement #2 ("catch document problems early").
